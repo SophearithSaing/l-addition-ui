@@ -1769,7 +1769,12 @@ layer(vendor);
     margin-bottom: var(--space-2xl);
   }
 
-  .receipt-section > h3 {
+  .receipt-section__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm);
     border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
     padding-bottom: var(--space-sm);
   }

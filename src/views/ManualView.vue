@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toPng } from 'html-to-image'
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -29,6 +29,20 @@ interface ManualAdjustment {
   amount: string
 }
 
+interface ManualDraftState {
+  restaurantName: string
+  currency: string
+  customCurrency: string
+  serviceCharge: string
+  taxRate: string
+  discount: string
+  discountUnit: 'fixed' | 'percentage'
+  diners: ManualDiner[]
+  sharedItems: SharedItem[]
+  adjustments: ManualAdjustment[]
+}
+
+const manualDraftStorageKey = 'l-addition.manual-draft'
 const restaurantName = ref('')
 const currency = ref('THB')
 const customCurrency = ref('')
@@ -40,6 +54,7 @@ const diners = ref<ManualDiner[]>([])
 const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
 const isReceiptGenerated = ref(false)
+const isReceiptDownloading = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -92,6 +107,22 @@ const receiptDate = computed(() => {
     year: 'numeric',
   }).format(new Date())
 })
+const receiptImageFileName = computed(() => {
+  const restaurant = restaurantName.value.trim() || 'l-addition-receipt'
+  const date = new Date().toISOString().slice(0, 10)
+  const slug = restaurant
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
+  return `${slug || 'l-addition-receipt'}-${date}.png`
+})
+const areAllReceiptDinersExpanded = computed(() => {
+  return (
+    receiptCalculation.value.diners.length > 0 &&
+    expandedDinerIds.value.length === receiptCalculation.value.diners.length
+  )
+})
 const currencySymbol = computed(() => {
   if (currency.value === 'THB') {
     return '฿'
@@ -128,6 +159,80 @@ function parseAmount(value: string): number {
  */
 function formatCurrency(amount: number): string {
   return `${currencySymbol.value}${amount.toFixed(2)}`
+}
+
+/**
+ * Builds the current manual bill draft for persistence.
+ *
+ * @returns Serializable manual bill draft.
+ */
+function getManualDraftState(): ManualDraftState {
+  return {
+    adjustments: adjustments.value,
+    currency: currency.value,
+    customCurrency: customCurrency.value,
+    diners: diners.value,
+    discount: discount.value,
+    discountUnit: discountUnit.value,
+    restaurantName: restaurantName.value,
+    serviceCharge: serviceCharge.value,
+    sharedItems: sharedItems.value,
+    taxRate: taxRate.value,
+  }
+}
+
+/**
+ * Restores manual bill draft state.
+ *
+ * @param draft Saved manual bill draft.
+ */
+function restoreManualDraftState(draft: ManualDraftState): void {
+  adjustments.value = draft.adjustments ?? []
+  currency.value = draft.currency || 'THB'
+  customCurrency.value = draft.customCurrency ?? ''
+  diners.value = draft.diners ?? []
+  discount.value = draft.discount ?? ''
+  discountUnit.value = draft.discountUnit ?? 'fixed'
+  restaurantName.value = draft.restaurantName ?? ''
+  serviceCharge.value = draft.serviceCharge ?? ''
+  sharedItems.value = draft.sharedItems ?? []
+  taxRate.value = draft.taxRate ?? ''
+  syncNextIds()
+}
+
+/**
+ * Synchronizes id counters after restoring saved data.
+ */
+function syncNextIds(): void {
+  nextDinerId = Math.max(0, ...diners.value.map((diner) => diner.id)) + 1
+  nextItemId =
+    Math.max(0, ...diners.value.flatMap((diner) => diner.items.map((item) => item.id))) + 1
+  nextSharedItemId = Math.max(0, ...sharedItems.value.map((item) => item.id)) + 1
+  nextAdjustmentId = Math.max(0, ...adjustments.value.map((adjustment) => adjustment.id)) + 1
+}
+
+/**
+ * Loads a saved manual bill draft from local storage.
+ */
+function loadManualDraft(): void {
+  const savedDraft = localStorage.getItem(manualDraftStorageKey)
+
+  if (!savedDraft) {
+    return
+  }
+
+  try {
+    restoreManualDraftState(JSON.parse(savedDraft) as ManualDraftState)
+  } catch {
+    localStorage.removeItem(manualDraftStorageKey)
+  }
+}
+
+/**
+ * Saves the current manual bill draft to local storage.
+ */
+function saveManualDraft(): void {
+  localStorage.setItem(manualDraftStorageKey, JSON.stringify(getManualDraftState()))
 }
 
 /**
@@ -322,23 +427,53 @@ function isReceiptDinerExpanded(dinerId: number): boolean {
 }
 
 /**
- * Downloads the generated receipt as a PNG image.
+ * Expands or collapses every diner receipt breakdown.
  */
-async function downloadReceiptImage(): Promise<void> {
-  if (!receiptExportFrame.value) {
+function toggleAllReceiptDiners(): void {
+  if (areAllReceiptDinersExpanded.value) {
+    expandedDinerIds.value = []
     return
   }
 
-  const dataUrl = await toPng(receiptExportFrame.value, {
-    cacheBust: true,
-    pixelRatio: 2,
-  })
-  const link = document.createElement('a')
-
-  link.download = 'l-addition-receipt.png'
-  link.href = dataUrl
-  link.click()
+  expandedDinerIds.value = receiptCalculation.value.diners.map((diner) => diner.id)
 }
+
+/**
+ * Downloads the generated receipt as a PNG image.
+ */
+async function downloadReceiptImage(): Promise<void> {
+  if (!receiptExportFrame.value || isReceiptDownloading.value) {
+    return
+  }
+
+  isReceiptDownloading.value = true
+
+  try {
+    const dataUrl = await toPng(receiptExportFrame.value, {
+      cacheBust: true,
+      pixelRatio: 2,
+    })
+    const link = document.createElement('a')
+
+    link.download = receiptImageFileName.value
+    link.href = dataUrl
+    link.click()
+  } finally {
+    isReceiptDownloading.value = false
+  }
+}
+
+onMounted(() => {
+  loadManualDraft()
+})
+
+watch(
+  getManualDraftState,
+  () => {
+    saveManualDraft()
+  },
+  { deep: true },
+)
 </script>
 
 <template>
@@ -708,9 +843,18 @@ async function downloadReceiptImage(): Promise<void> {
           </header>
 
           <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
-            <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
-              The Table Breakdown
-            </h3>
+            <div class="receipt-section__header">
+              <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
+                Guest Breakdown
+              </h3>
+              <button
+                class="inline-text-action type-label"
+                type="button"
+                @click="toggleAllReceiptDiners"
+              >
+                {{ areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All' }}
+              </button>
+            </div>
 
             <div class="receipt-diner-grid">
               <section
@@ -828,8 +972,13 @@ async function downloadReceiptImage(): Promise<void> {
       </div>
 
       <div v-if="isReceiptGenerated" class="receipt-actions">
-        <button class="button button--outline" type="button" @click="downloadReceiptImage">
-          Download Image
+        <button
+          class="button button--outline"
+          type="button"
+          :disabled="isReceiptDownloading"
+          @click="downloadReceiptImage"
+        >
+          {{ isReceiptDownloading ? 'Preparing Image…' : 'Download Image' }}
           <span class="material-symbols-outlined" aria-hidden="true">download</span>
         </button>
       </div>
