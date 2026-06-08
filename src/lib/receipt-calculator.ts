@@ -1,0 +1,191 @@
+export type AdjustmentUnit = 'fixed' | 'percentage'
+
+export interface ReceiptItemInput {
+  id: number
+  name: string
+  amount: number
+}
+
+export interface ReceiptDinerInput {
+  id: number
+  name: string
+  items: ReceiptItemInput[]
+}
+
+export interface ReceiptSharedItemInput extends ReceiptItemInput {
+  participantIds: number[]
+}
+
+export interface ReceiptAdjustmentInput {
+  id: number
+  label: string
+  amount: number
+}
+
+export interface ReceiptDiscountInput {
+  amount: number
+  unit: AdjustmentUnit
+}
+
+export interface ReceiptCalculationInput {
+  diners: ReceiptDinerInput[]
+  sharedItems: ReceiptSharedItemInput[]
+  serviceRate: number
+  taxRate: number
+  adjustments: ReceiptAdjustmentInput[]
+  discount: ReceiptDiscountInput
+}
+
+export interface ReceiptLineItem {
+  id: number
+  name: string
+  amount: number
+  source: 'individual' | 'shared'
+}
+
+export interface ReceiptDinerTotal {
+  id: number
+  name: string
+  items: ReceiptLineItem[]
+  subtotal: number
+  service: number
+  tax: number
+  adjustments: number
+  discount: number
+  fees: number
+  total: number
+}
+
+export interface ReceiptCalculation {
+  diners: ReceiptDinerTotal[]
+  subtotal: number
+  service: number
+  tax: number
+  adjustments: number
+  discount: number
+  total: number
+}
+
+/**
+ * Calculates receipt totals and diner-level allocations.
+ *
+ * @param input Bill data to calculate.
+ * @returns Receipt totals and per-diner totals.
+ */
+export function calculateReceipt(input: ReceiptCalculationInput): ReceiptCalculation {
+  const dinerSubtotals = new Map<number, number>()
+  const dinerItems = new Map<number, ReceiptLineItem[]>()
+
+  input.diners.forEach((diner) => {
+    const ownSubtotal = diner.items.reduce((total, item) => total + item.amount, 0)
+
+    dinerSubtotals.set(diner.id, ownSubtotal)
+    dinerItems.set(
+      diner.id,
+      diner.items.map((item) => ({
+        amount: item.amount,
+        id: item.id,
+        name: item.name,
+        source: 'individual',
+      })),
+    )
+  })
+
+  input.sharedItems.forEach((item) => {
+    const participants = item.participantIds.filter((participantId) => {
+      return input.diners.some((diner) => diner.id === participantId)
+    })
+
+    if (participants.length === 0) {
+      return
+    }
+
+    const participantAmount = item.amount / participants.length
+
+    participants.forEach((participantId) => {
+      dinerSubtotals.set(
+        participantId,
+        (dinerSubtotals.get(participantId) ?? 0) + participantAmount,
+      )
+      dinerItems.get(participantId)?.push({
+        amount: participantAmount,
+        id: item.id,
+        name: item.name,
+        source: 'shared',
+      })
+    })
+  })
+
+  const subtotal = Array.from(dinerSubtotals.values()).reduce((total, amount) => total + amount, 0)
+  const service = subtotal * (input.serviceRate / 100)
+  const taxableTotal = subtotal + service
+  const tax = taxableTotal * (input.taxRate / 100)
+  const adjustments = input.adjustments.reduce((total, adjustment) => total + adjustment.amount, 0)
+  const preDiscountTotal = subtotal + service + tax + adjustments
+  const discount = getDiscountAmount(input.discount, preDiscountTotal)
+  const total = Math.max(0, preDiscountTotal - discount)
+
+  const diners = input.diners.map((diner) => {
+    const dinerSubtotal = dinerSubtotals.get(diner.id) ?? 0
+    const dinerService = dinerSubtotal * (input.serviceRate / 100)
+    const dinerTax = (dinerSubtotal + dinerService) * (input.taxRate / 100)
+    const dinerAdjustments = allocateAmount(adjustments, dinerSubtotal, subtotal)
+    const dinerPreDiscountTotal = dinerSubtotal + dinerService + dinerTax + dinerAdjustments
+    const dinerDiscount = allocateAmount(discount, dinerPreDiscountTotal, preDiscountTotal)
+    const dinerTotal = Math.max(0, dinerPreDiscountTotal - dinerDiscount)
+
+    return {
+      adjustments: dinerAdjustments,
+      discount: dinerDiscount,
+      fees: dinerService + dinerTax + dinerAdjustments - dinerDiscount,
+      id: diner.id,
+      items: dinerItems.get(diner.id) ?? [],
+      name: diner.name,
+      service: dinerService,
+      subtotal: dinerSubtotal,
+      tax: dinerTax,
+      total: dinerTotal,
+    }
+  })
+
+  return {
+    adjustments,
+    diners,
+    discount,
+    service,
+    subtotal,
+    tax,
+    total,
+  }
+}
+
+/**
+ * Calculates the effective discount amount.
+ *
+ * @param discount Discount input.
+ * @param preDiscountTotal Total before discount.
+ * @returns Effective discount amount.
+ */
+function getDiscountAmount(discount: ReceiptDiscountInput, preDiscountTotal: number): number {
+  if (discount.unit === 'percentage') {
+    return preDiscountTotal * (discount.amount / 100)
+  }
+
+  return discount.amount
+}
+
+/**
+ * Allocates a total amount proportionally.
+ *
+ * @param amount Total amount to allocate.
+ * @param portion Portion receiving allocation.
+ * @param base Total allocation base.
+ * @returns Proportional allocation.
+ */
+function allocateAmount(amount: number, portion: number, base: number): number {
+  if (base <= 0) {
+    return 0
+  }
+
+  return amount * (portion / base)
+}
