@@ -976,13 +976,23 @@ layer(vendor);
     text-decoration: none;
   }
 
+  .public-nav__links,
+  .public-nav__actions {
+    display: flex;
+    align-items: center;
+  }
+
   .public-nav__links {
     display: none;
-    align-items: center;
     gap: var(--space-lg);
   }
 
+  .public-nav__actions {
+    gap: var(--space-sm);
+  }
+
   .public-nav__link,
+  .public-header-link,
   .public-login,
   .public-footer__links a {
     border: 0;
@@ -997,6 +1007,7 @@ layer(vendor);
 
   .public-nav__link:hover,
   .public-nav__link--active,
+  .public-header-link:hover,
   .public-login,
   .public-footer__links a:hover {
     color: var(--color-primary);

@@ -29,6 +29,11 @@ function closeMobileMenu(): void {
       </div>
 
       <div class="stack-xs">
+        <RouterLink class="side-nav__item type-label" to="/">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          Back to App
+        </RouterLink>
+        <div class="divider"></div>
         <RouterLink
           class="side-nav__item type-label"
           active-class="side-nav__item--active"
@@ -119,6 +124,11 @@ function closeMobileMenu(): void {
         </div>
 
         <div class="stack-xs">
+          <RouterLink class="side-nav__item type-label" to="/" @click="closeMobileMenu">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Back to App
+          </RouterLink>
+          <div class="divider"></div>
           <RouterLink
             class="side-nav__item type-label"
             active-class="side-nav__item--active"

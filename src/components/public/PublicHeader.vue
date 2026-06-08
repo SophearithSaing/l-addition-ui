@@ -2,7 +2,9 @@
   <header class="public-header">
     <nav class="public-nav app-container" aria-label="Primary navigation">
       <RouterLink class="public-brand" to="/">L'Addition</RouterLink>
-      <button class="public-login type-label" type="button">Login</button>
+      <RouterLink class="public-header-link type-label" to="/design-system/philosophy">
+        Design System
+      </RouterLink>
     </nav>
   </header>
 </template>
