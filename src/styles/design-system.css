@@ -2453,6 +2453,10 @@ layer(vendor);
       var(--color-surface-container-highest);
   }
 
+  .design-system-panel-img {
+    border-radius: var(--radius-lg);
+  }
+
   .principle-card {
     min-height: 260px;
     display: flex;
