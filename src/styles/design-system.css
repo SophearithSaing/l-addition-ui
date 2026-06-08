@@ -1265,7 +1265,7 @@ layer(vendor);
   }
 
   .manual-page {
-    padding-block: var(--space-section);
+    padding-block: var(--space-lg);
   }
 
   .manual-hero {
@@ -1398,12 +1398,13 @@ layer(vendor);
   .manual-diner-card {
     position: relative;
     display: flex;
+    min-width: 0;
     flex-direction: column;
     overflow: hidden;
     background: var(--color-surface);
     border: var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    padding: var(--space-sm);
     box-shadow: var(--shadow-ambient);
   }
 
@@ -1431,7 +1432,13 @@ layer(vendor);
   }
 
   .manual-diner-card__name {
+    min-width: 0;
     flex: 1 1 auto;
+  }
+
+  .manual-diner-card > .split-row {
+    flex-wrap: nowrap;
+    align-items: flex-end;
   }
 
   .manual-diner-card:hover {
@@ -1486,12 +1493,21 @@ layer(vendor);
 
   .manual-item-row,
   .summary-input-row {
-    display: flex;
+    min-width: 0;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     border-bottom: var(--border-subtle);
     padding-block: var(--space-xs);
+  }
+
+  .manual-item-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+  }
+
+  .summary-input-row {
+    display: flex;
+    justify-content: space-between;
   }
 
   .manual-item-row--active {
@@ -1513,6 +1529,7 @@ layer(vendor);
   }
 
   .manual-item-row__name {
+    min-width: 0;
     flex: 1;
     font-size: var(--type-body-md-size);
     line-height: var(--type-body-md-line);
@@ -1529,7 +1546,7 @@ layer(vendor);
 
   .manual-item-row__price input,
   .summary-input-row input {
-    width: 5rem;
+    width: 3.75rem;
     font-size: var(--type-number-md-size);
     font-variant-numeric: tabular-nums lining-nums;
     line-height: var(--type-number-md-line);
@@ -1624,9 +1641,10 @@ layer(vendor);
   }
 
   .manual-summary {
+    min-width: 0;
     background: var(--color-surface-container-low);
     border: var(--border-subtle);
-    padding: var(--space-lg);
+    padding: var(--space-sm);
   }
 
   .summary-input-row {
@@ -1658,10 +1676,10 @@ layer(vendor);
 
   .manual-total-value {
     font-family: var(--font-body);
-    font-size: var(--type-display-lg-size);
+    font-size: var(--type-headline-lg-mobile-size);
     font-weight: var(--type-number-xl-weight);
     font-variant-numeric: tabular-nums lining-nums;
-    line-height: var(--type-display-lg-line);
+    line-height: var(--type-headline-lg-mobile-line);
     letter-spacing: var(--type-number-xl-tracking);
   }
 
@@ -1705,6 +1723,7 @@ layer(vendor);
   .receipt-export-frame {
     width: min(100%, 1120px);
     margin: var(--space-section) auto 0;
+    overflow: hidden;
     background:
       radial-gradient(
         circle at top,
@@ -1712,7 +1731,7 @@ layer(vendor);
         transparent 42%
       ),
       var(--color-surface-container-low);
-    padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+    padding: var(--space-sm) var(--space-sm) var(--space-lg);
   }
 
   .receipt-panel {
@@ -1726,7 +1745,7 @@ layer(vendor);
     );
     border: 1px solid color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: var(--space-xl) var(--space-lg);
+    padding: var(--space-md) var(--space-sm);
     box-shadow: var(--shadow-elevated);
   }
 
@@ -1740,9 +1759,15 @@ layer(vendor);
   }
 
   .receipt-panel__header {
+    min-width: 0;
     align-items: center;
     margin-bottom: var(--space-2xl);
     text-align: center;
+  }
+
+  .receipt-panel__header h2 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .receipt-panel__meta {
@@ -1787,6 +1812,7 @@ layer(vendor);
 
   .receipt-diner-card__header {
     display: flex;
+    min-width: 0;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-sm);
@@ -1804,7 +1830,13 @@ layer(vendor);
     text-transform: uppercase;
   }
 
+  .receipt-diner-card__header span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .receipt-diner-card__header .material-symbols-outlined {
+    flex: 0 0 auto;
     font-size: var(--type-body-lg-size);
   }
 
@@ -1820,13 +1852,23 @@ layer(vendor);
 
   .receipt-line {
     display: flex;
+    min-width: 0;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--space-xs);
+    gap: var(--space-2xs);
     color: var(--color-on-surface-variant);
     font-family: var(--font-body);
     font-size: var(--type-body-md-size);
     line-height: var(--type-body-md-line);
+  }
+
+  .receipt-line span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .receipt-line span:last-child {
+    flex: 0 0 auto;
   }
 
   .receipt-line span[aria-hidden='true'] {
@@ -1888,6 +1930,31 @@ layer(vendor);
       display: flex;
     }
 
+    .manual-page {
+      padding-block: var(--space-section);
+    }
+
+    .manual-empty-state,
+    .manual-diner-card,
+    .manual-summary {
+      padding: var(--space-lg);
+    }
+
+    .manual-item-row,
+    .summary-input-row {
+      gap: var(--space-sm);
+    }
+
+    .manual-item-row__price input,
+    .summary-input-row input {
+      width: 5rem;
+    }
+
+    .manual-total-value {
+      font-size: var(--type-display-lg-size);
+      line-height: var(--type-display-lg-line);
+    }
+
     .manual-context-row {
       grid-template-columns: minmax(0, 1fr) max-content;
     }
@@ -1903,6 +1970,10 @@ layer(vendor);
 
     .recent-card-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .receipt-export-frame {
+      padding: var(--space-xl) var(--space-xl) var(--space-2xl);
     }
 
     .receipt-panel {
