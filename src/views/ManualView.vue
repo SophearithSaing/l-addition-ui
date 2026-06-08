@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import { calculateReceipt } from '@/lib/receipt-calculator'
 
 interface ManualItem {
   id: number
@@ -37,52 +38,57 @@ const discountUnit = ref<'fixed' | 'percentage'>('fixed')
 const diners = ref<ManualDiner[]>([])
 const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
+const isReceiptGenerated = ref(false)
+const expandedDinerIds = ref<number[]>([])
+const receiptPanel = ref<HTMLElement | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
 let nextSharedItemId = 1
 let nextAdjustmentId = 1
 
-const subtotal = computed(() => {
-  const dinerSubtotal = diners.value.reduce((dinerTotal, diner) => {
-    return (
-      dinerTotal +
-      diner.items.reduce((itemTotal, item) => {
-        return itemTotal + parseAmount(item.amount)
-      }, 0)
-    )
-  }, 0)
-
-  return (
-    dinerSubtotal +
-    sharedItems.value.reduce((sharedTotal, item) => {
-      return sharedTotal + parseAmount(item.amount)
-    }, 0)
-  )
+const receiptCalculation = computed(() => {
+  return calculateReceipt({
+    adjustments: adjustments.value.map((adjustment) => ({
+      amount: parseAmount(adjustment.amount),
+      id: adjustment.id,
+      label: adjustment.label,
+    })),
+    diners: diners.value.map((diner) => ({
+      id: diner.id,
+      items: diner.items.map((item) => ({
+        amount: parseAmount(item.amount),
+        id: item.id,
+        name: item.name,
+      })),
+      name: diner.name,
+    })),
+    discount: {
+      amount: parseAmount(discount.value),
+      unit: discountUnit.value,
+    },
+    serviceRate: parseAmount(serviceCharge.value),
+    sharedItems: sharedItems.value.map((item) => ({
+      amount: parseAmount(item.amount),
+      id: item.id,
+      name: item.name,
+      participantIds: item.participantIds,
+    })),
+    taxRate: parseAmount(taxRate.value),
+  })
 })
-
-const serviceTotal = computed(() => subtotal.value * (parseAmount(serviceCharge.value) / 100))
-const taxableTotal = computed(() => subtotal.value + serviceTotal.value)
-const taxTotal = computed(() => taxableTotal.value * (parseAmount(taxRate.value) / 100))
-const taxAndFees = computed(() => serviceTotal.value + taxTotal.value)
-const adjustmentBaseTotal = computed(() => subtotal.value + taxAndFees.value)
-const additionalAdjustmentsTotal = computed(() => {
-  return adjustments.value.reduce((adjustmentTotal, adjustment) => {
-    return adjustmentTotal + parseAmount(adjustment.amount)
-  }, 0)
-})
-const preDiscountTotal = computed(
-  () => adjustmentBaseTotal.value + additionalAdjustmentsTotal.value,
-)
-const discountTotal = computed(() => {
-  if (discountUnit.value === 'percentage') {
-    return preDiscountTotal.value * (parseAmount(discount.value) / 100)
-  }
-
-  return parseAmount(discount.value)
-})
-const total = computed(() => Math.max(0, preDiscountTotal.value - discountTotal.value))
+const subtotal = computed(() => receiptCalculation.value.subtotal)
+const taxAndFees = computed(() => receiptCalculation.value.service + receiptCalculation.value.tax)
+const additionalAdjustmentsTotal = computed(() => receiptCalculation.value.adjustments)
+const total = computed(() => receiptCalculation.value.total)
 const hasItems = computed(() => {
   return diners.value.some((diner) => diner.items.length > 0) || sharedItems.value.length > 0
+})
+const receiptDate = computed(() => {
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date())
 })
 const currencySymbol = computed(() => {
   if (currency.value === 'THB') {
@@ -273,6 +279,44 @@ function removeAdjustment(adjustmentId: number): void {
  */
 function getDinerLabel(diner: ManualDiner, index: number): string {
   return diner.name.trim() || `Diner ${index + 1}`
+}
+
+/**
+ * Shows the generated receipt and opens all diner breakdowns.
+ */
+function generateReceipt(): void {
+  isReceiptGenerated.value = true
+  expandedDinerIds.value = []
+  nextTick(() => {
+    receiptPanel.value?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  })
+}
+
+/**
+ * Toggles a diner itemized receipt breakdown.
+ *
+ * @param dinerId Diner id to toggle.
+ */
+function toggleReceiptDiner(dinerId: number): void {
+  if (expandedDinerIds.value.includes(dinerId)) {
+    expandedDinerIds.value = expandedDinerIds.value.filter((id) => id !== dinerId)
+    return
+  }
+
+  expandedDinerIds.value.push(dinerId)
+}
+
+/**
+ * Checks whether a diner receipt breakdown is expanded.
+ *
+ * @param dinerId Diner id to check.
+ * @returns Whether the diner breakdown is expanded.
+ */
+function isReceiptDinerExpanded(dinerId: number): boolean {
+  return expandedDinerIds.value.includes(dinerId)
 }
 </script>
 
@@ -508,7 +552,7 @@ function getDinerLabel(diner: ManualDiner, index: number): string {
               </span>
             </label>
             <label class="summary-input-row">
-              <span>VAT / Tax</span>
+              <span>VAT</span>
               <span>
                 <input
                   v-model="taxRate"
@@ -602,7 +646,7 @@ function getDinerLabel(diner: ManualDiner, index: number): string {
               <span class="type-number-md text-primary">{{ formatCurrency(subtotal) }}</span>
             </div>
             <div class="totals-row">
-              <span class="type-body-md text-muted">Tax &amp; Fees</span>
+              <span class="type-body-md text-muted">VAT &amp; Fees</span>
               <span class="type-number-md text-primary">{{ formatCurrency(taxAndFees) }}</span>
             </div>
             <div v-if="additionalAdjustmentsTotal > 0" class="totals-row">
@@ -621,12 +665,147 @@ function getDinerLabel(diner: ManualDiner, index: number): string {
             class="button button--primary manual-summary__action"
             type="button"
             :disabled="!hasItems"
+            @click="generateReceipt"
           >
             Generate Receipt
             <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
           </button>
         </aside>
       </div>
+
+      <article
+        v-if="isReceiptGenerated"
+        ref="receiptPanel"
+        class="receipt-panel"
+        aria-labelledby="receipt-title"
+      >
+        <header class="receipt-panel__header stack-sm">
+          <h2 id="receipt-title" class="type-display-lg text-primary">
+            {{ restaurantName || "L'Addition Receipt" }}
+          </h2>
+          <div class="receipt-panel__meta type-label text-muted">
+            <span>{{ receiptDate }}</span>
+            <span aria-hidden="true"></span>
+            <span>{{ currency === 'custom' ? 'Custom' : currency }}</span>
+          </div>
+        </header>
+
+        <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
+          <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
+            The Table Breakdown
+          </h3>
+
+          <div class="receipt-diner-grid">
+            <section
+              v-for="(diner, index) in receiptCalculation.diners"
+              :key="diner.id"
+              class="receipt-diner-card"
+            >
+              <button
+                class="receipt-diner-card__header"
+                type="button"
+                :aria-expanded="isReceiptDinerExpanded(diner.id)"
+                @click="toggleReceiptDiner(diner.id)"
+              >
+                <span>{{ diner.name || `Diner ${index + 1}` }}</span>
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  {{ isReceiptDinerExpanded(diner.id) ? 'expand_less' : 'expand_more' }}
+                </span>
+              </button>
+
+              <ul class="receipt-line-list">
+                <li class="receipt-line">
+                  <span>Food Total</span>
+                  <span aria-hidden="true"></span>
+                  <span>{{ formatCurrency(diner.subtotal) }}</span>
+                </li>
+                <li class="receipt-line">
+                  <span>Fees &amp; VAT</span>
+                  <span aria-hidden="true"></span>
+                  <span>{{ formatCurrency(diner.fees) }}</span>
+                </li>
+                <template v-if="isReceiptDinerExpanded(diner.id)">
+                  <li
+                    v-for="item in diner.items"
+                    :key="`${item.source}-${item.id}`"
+                    class="receipt-line receipt-line--itemized"
+                  >
+                    <span>{{ item.name || 'Untitled item' }}</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatCurrency(item.amount) }}</span>
+                  </li>
+                  <li class="receipt-line receipt-line--itemized">
+                    <span>Service</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatCurrency(diner.service) }}</span>
+                  </li>
+                  <li class="receipt-line receipt-line--itemized">
+                    <span>VAT</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatCurrency(diner.tax) }}</span>
+                  </li>
+                  <li v-if="diner.adjustments > 0" class="receipt-line receipt-line--itemized">
+                    <span>Adjustments</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatCurrency(diner.adjustments) }}</span>
+                  </li>
+                  <li v-if="diner.discount > 0" class="receipt-line receipt-line--itemized">
+                    <span>Discount</span>
+                    <span aria-hidden="true"></span>
+                    <span>-{{ formatCurrency(diner.discount) }}</span>
+                  </li>
+                </template>
+              </ul>
+
+              <div class="receipt-diner-card__total type-label text-primary">
+                <span>Individual Total</span>
+                <span>{{ formatCurrency(diner.total) }}</span>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="receipt-summary" aria-label="Receipt total summary">
+          <div class="receipt-summary__inner stack-sm">
+            <div class="totals-row">
+              <span class="type-body-md text-muted">Subtotal</span>
+              <span class="type-number-md text-primary">{{
+                formatCurrency(receiptCalculation.subtotal)
+              }}</span>
+            </div>
+            <div class="totals-row">
+              <span class="type-body-md text-muted">Service</span>
+              <span class="type-number-md text-primary">{{
+                formatCurrency(receiptCalculation.service)
+              }}</span>
+            </div>
+            <div class="totals-row">
+              <span class="type-body-md text-muted">VAT</span>
+              <span class="type-number-md text-primary">{{
+                formatCurrency(receiptCalculation.tax)
+              }}</span>
+            </div>
+            <div v-if="receiptCalculation.adjustments > 0" class="totals-row">
+              <span class="type-body-md text-muted">Adjustments</span>
+              <span class="type-number-md text-primary">{{
+                formatCurrency(receiptCalculation.adjustments)
+              }}</span>
+            </div>
+            <div v-if="receiptCalculation.discount > 0" class="totals-row">
+              <span class="type-body-md text-muted">Discount</span>
+              <span class="type-number-md text-primary"
+                >-{{ formatCurrency(receiptCalculation.discount) }}</span
+              >
+            </div>
+            <div class="totals-row totals-row--total receipt-summary__total">
+              <span class="type-label text-primary">Total Paid</span>
+              <span class="manual-total-value text-primary">{{
+                formatCurrency(receiptCalculation.total)
+              }}</span>
+            </div>
+          </div>
+        </section>
+      </article>
     </main>
   </PublicLayout>
 </template>
