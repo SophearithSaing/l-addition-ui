@@ -10,7 +10,9 @@
       </p>
     </section>
 
-    <div class="design-system-linen-panel surface-ambient" aria-hidden="true"></div>
+    <div class="design-system-linen-panel surface-ambient" aria-hidden="true">
+      <img class="design-system-panel-img" src="/src/assets/panel-1.png" alt="" />
+    </div>
 
     <section class="stack-md">
       <div class="stack-sm">

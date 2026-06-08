@@ -5,7 +5,15 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/design-system/philosophy',
+      component: () => import('@/views/HomeView.vue'),
+    },
+    {
+      path: '/scan',
+      component: () => import('@/views/ScanView.vue'),
+    },
+    {
+      path: '/manual',
+      component: () => import('@/views/ManualView.vue'),
     },
     {
       path: '/design-system',
