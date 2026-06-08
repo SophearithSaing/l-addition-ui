@@ -1665,8 +1665,41 @@ layer(vendor);
     letter-spacing: var(--type-number-xl-tracking);
   }
 
+  .manual-summary__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
   .manual-summary__action {
     width: 100%;
+  }
+
+  .dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(28 28 26 / 32%);
+    padding: var(--space-container-mobile);
+  }
+
+  .dialog-panel {
+    width: min(100%, 420px);
+    background: var(--color-surface-container-lowest);
+    border: var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-sm);
   }
 
   .receipt-export-frame {
@@ -1703,45 +1736,6 @@ layer(vendor);
     height: 1px;
     margin: 0 auto var(--space-xl);
     background: var(--color-secondary);
-    content: '';
-  }
-
-  .receipt-panel::after {
-    position: absolute;
-    right: -1px;
-    bottom: calc(var(--space-sm) * -1);
-    left: -1px;
-    height: var(--space-sm);
-    background: inherit;
-    clip-path: polygon(
-      0 0,
-      4% 100%,
-      8% 0,
-      12% 100%,
-      16% 0,
-      20% 100%,
-      24% 0,
-      28% 100%,
-      32% 0,
-      36% 100%,
-      40% 0,
-      44% 100%,
-      48% 0,
-      52% 100%,
-      56% 0,
-      60% 100%,
-      64% 0,
-      68% 100%,
-      72% 0,
-      76% 100%,
-      80% 0,
-      84% 100%,
-      88% 0,
-      92% 100%,
-      96% 0,
-      100% 100%,
-      100% 0
-    );
     content: '';
   }
 

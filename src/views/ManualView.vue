@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -55,6 +56,8 @@ const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
 const isReceiptGenerated = ref(false)
 const isReceiptDownloading = ref(false)
+const isClearDialogOpen = ref(false)
+const shouldSkipNextDraftSave = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -99,6 +102,20 @@ const additionalAdjustmentsTotal = computed(() => receiptCalculation.value.adjus
 const total = computed(() => receiptCalculation.value.total)
 const hasItems = computed(() => {
   return diners.value.some((diner) => diner.items.length > 0) || sharedItems.value.length > 0
+})
+const hasBillData = computed(() => {
+  return (
+    restaurantName.value.trim().length > 0 ||
+    customCurrency.value.trim().length > 0 ||
+    serviceCharge.value.trim().length > 0 ||
+    taxRate.value.trim().length > 0 ||
+    discount.value.trim().length > 0 ||
+    currency.value !== 'THB' ||
+    diners.value.length > 0 ||
+    sharedItems.value.length > 0 ||
+    adjustments.value.length > 0 ||
+    isReceiptGenerated.value
+  )
 })
 const receiptDate = computed(() => {
   return new Intl.DateTimeFormat('en-US', {
@@ -233,6 +250,49 @@ function loadManualDraft(): void {
  */
 function saveManualDraft(): void {
   localStorage.setItem(manualDraftStorageKey, JSON.stringify(getManualDraftState()))
+}
+
+/**
+ * Opens the clear bill confirmation dialog.
+ */
+function openClearDialog(): void {
+  if (!hasBillData.value) {
+    return
+  }
+
+  isClearDialogOpen.value = true
+}
+
+/**
+ * Closes the clear bill confirmation dialog.
+ */
+function closeClearDialog(): void {
+  isClearDialogOpen.value = false
+}
+
+/**
+ * Clears the current manual bill and saved draft.
+ */
+function confirmClearBill(): void {
+  shouldSkipNextDraftSave.value = true
+  restaurantName.value = ''
+  currency.value = 'THB'
+  customCurrency.value = ''
+  serviceCharge.value = ''
+  taxRate.value = ''
+  discount.value = ''
+  discountUnit.value = 'fixed'
+  diners.value = []
+  sharedItems.value = []
+  adjustments.value = []
+  isReceiptGenerated.value = false
+  expandedDinerIds.value = []
+  nextDinerId = 1
+  nextItemId = 1
+  nextSharedItemId = 1
+  nextAdjustmentId = 1
+  localStorage.removeItem(manualDraftStorageKey)
+  isClearDialogOpen.value = false
 }
 
 /**
@@ -470,6 +530,12 @@ onMounted(() => {
 watch(
   getManualDraftState,
   () => {
+    if (shouldSkipNextDraftSave.value) {
+      shouldSkipNextDraftSave.value = false
+      localStorage.removeItem(manualDraftStorageKey)
+      return
+    }
+
     saveManualDraft()
   },
   { deep: true },
@@ -817,15 +883,26 @@ watch(
             </div>
           </section>
 
-          <button
-            class="button button--primary manual-summary__action"
-            type="button"
-            :disabled="!hasItems"
-            @click="generateReceipt"
-          >
-            Generate Receipt
-            <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-          </button>
+          <div class="manual-summary__actions">
+            <button
+              class="button button--primary manual-summary__action"
+              type="button"
+              :disabled="!hasItems"
+              @click="generateReceipt"
+            >
+              Generate Receipt
+              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+            </button>
+            <button
+              class="button button--outline manual-summary__action"
+              type="button"
+              :disabled="!hasBillData"
+              @click="openClearDialog"
+            >
+              Clear
+              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
         </aside>
       </div>
 
@@ -970,6 +1047,16 @@ watch(
           <p class="receipt-signature">L'Addition</p>
         </article>
       </div>
+
+      <ConfirmDialog
+        :is-open="isClearDialogOpen"
+        title="Clear Bill"
+        message="This will remove the current bill, generated receipt, and saved draft from this device."
+        confirm-label="Clear"
+        cancel-label="Keep"
+        @confirm="confirmClearBill"
+        @cancel="closeClearDialog"
+      />
 
       <div v-if="isReceiptGenerated" class="receipt-actions">
         <button
