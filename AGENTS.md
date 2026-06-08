@@ -4,19 +4,43 @@
 
 ## Technical Constraints
 
-- **Frontend:** Vue.js, SCSS (Custom Styles only, NO Tailwind).
+- **Frontend:** Vue.js, CSS (Custom Styles only, NO Tailwind).
 - **Backend:** Deno.
 - **Database:** MongoDB (Mongoose).
 
 ## Design
 
-For any design-related work, first read `DESIGN.md` and `design-system.scss`.
+For any design-related work, first read `DESIGN.md` and `design-system.css`.
 
 Follow `DESIGN.md` as the source of truth for UI, UX, styling, layout, components, and interaction patterns.
 
-Follow `design-system.scss` as the source of truth for design tokens, variables, mixins, colors, spacing, typography, breakpoints, shadows, borders, and reusable style primitives.
+Follow `design-system.css` as the source of truth for design tokens, variables, colors, spacing, typography, breakpoints, shadows, borders, and reusable style primitives.
 
 Do not introduce new design patterns, hardcoded visual values, or duplicate style primitives unless explicitly requested.
+
+### Design System Philosophy
+
+The design system owns visual decisions. Product components should compose existing design tokens, primitives, components, and patterns instead of creating new styles locally.
+
+### Rules
+
+1. No hardcoded visual values in components.
+   Use design tokens for color, spacing, typography, shadows, borders, radii, and breakpoints.
+
+2. No one-off component styling when a reusable primitive or pattern would work.
+
+3. If a visual pattern appears twice, promote it into the design system.
+
+4. Components may define layout-specific styles only when the style is truly unique to that component.
+
+5. Responsive behavior should be handled through design-system media queries, layout primitives, or documented patterns.
+
+6. New variants must be added to the design system before being used in product components.
+
+7. Component-local CSS is allowed only as an escape hatch, and it must still use design-system tokens.
+
+8. The design system should describe intent, not raw CSS.
+   Prefer `surface-card`, `text-muted`, `button-primary`, and `stack-md` over arbitrary values.
 
 ## Code Style
 
