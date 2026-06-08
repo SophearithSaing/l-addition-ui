@@ -1106,6 +1106,11 @@ layer(vendor);
       box-shadow var(--motion-smooth);
   }
 
+  .home-choice-card--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .home-choice-card--scan {
     border-style: dashed;
     border-width: 2px;
@@ -1116,10 +1121,10 @@ layer(vendor);
     box-shadow: var(--shadow-ambient);
   }
 
-  .home-choice-card--scan:hover {
+  /*.home-choice-card--scan:hover {
     border-color: var(--color-primary);
     background: var(--color-surface-bright);
-  }
+  }*/
 
   .home-choice-card__glow,
   .upload-zone__glow {

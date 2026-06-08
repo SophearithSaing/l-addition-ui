@@ -19,7 +19,10 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
       </section>
 
       <section class="home-choice-grid" aria-label="Bill entry options">
-        <RouterLink class="home-choice-card home-choice-card--scan" to="/scan">
+        <!-- <RouterLink
+          class="home-choice-card home-choice-card--scan"
+          to="/scan"
+        >
           <span class="home-choice-card__glow" aria-hidden="true"></span>
           <span class="home-choice-card__icon" aria-hidden="true">
             <span class="material-symbols-outlined icon-lg">receipt_long</span>
@@ -30,8 +33,20 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
               We'll automatically itemize the bill using smart recognition.
             </span>
           </span>
-        </RouterLink>
+        </RouterLink> -->
 
+        <div class="home-choice-card home-choice-card--disabled home-choice-card--scan" to="/scan">
+          <span class="home-choice-card__glow" aria-hidden="true"></span>
+          <span class="home-choice-card__icon" aria-hidden="true">
+            <span class="material-symbols-outlined icon-lg">receipt_long</span>
+          </span>
+          <span class="home-choice-card__copy stack-xs">
+            <span class="type-body-lg text-primary">Scan or Upload Receipt</span>
+            <span class="type-body-md text-muted">
+              We'll automatically itemize the bill using smart recognition.
+            </span>
+          </span>
+        </div>
         <div class="home-choice-divider type-label text-muted" aria-hidden="true">or</div>
 
         <RouterLink class="home-choice-card" to="/manual">
