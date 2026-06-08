@@ -107,9 +107,9 @@ const hasBillData = computed(() => {
   return (
     restaurantName.value.trim().length > 0 ||
     customCurrency.value.trim().length > 0 ||
-    serviceCharge.value.trim().length > 0 ||
-    taxRate.value.trim().length > 0 ||
-    discount.value.trim().length > 0 ||
+    Number(serviceCharge.value) > 0 ||
+    Number(taxRate.value) > 0 ||
+    Number(discount.value) > 0 ||
     currency.value !== 'THB' ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
