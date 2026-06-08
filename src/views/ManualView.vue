@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { toPng } from 'html-to-image'
 import { computed, nextTick, ref } from 'vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -29,7 +30,7 @@ interface ManualAdjustment {
 }
 
 const restaurantName = ref('')
-const currency = ref('USD')
+const currency = ref('THB')
 const customCurrency = ref('')
 const serviceCharge = ref('')
 const taxRate = ref('')
@@ -41,6 +42,7 @@ const adjustments = ref<ManualAdjustment[]>([])
 const isReceiptGenerated = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
+const receiptExportFrame = ref<HTMLElement | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
 let nextSharedItemId = 1
@@ -317,6 +319,25 @@ function toggleReceiptDiner(dinerId: number): void {
  */
 function isReceiptDinerExpanded(dinerId: number): boolean {
   return expandedDinerIds.value.includes(dinerId)
+}
+
+/**
+ * Downloads the generated receipt as a PNG image.
+ */
+async function downloadReceiptImage(): Promise<void> {
+  if (!receiptExportFrame.value) {
+    return
+  }
+
+  const dataUrl = await toPng(receiptExportFrame.value, {
+    cacheBust: true,
+    pixelRatio: 2,
+  })
+  const link = document.createElement('a')
+
+  link.download = 'l-addition-receipt.png'
+  link.href = dataUrl
+  link.click()
 }
 </script>
 
@@ -673,139 +694,145 @@ function isReceiptDinerExpanded(dinerId: number): boolean {
         </aside>
       </div>
 
-      <article
-        v-if="isReceiptGenerated"
-        ref="receiptPanel"
-        class="receipt-panel"
-        aria-labelledby="receipt-title"
-      >
-        <header class="receipt-panel__header stack-sm">
-          <h2 id="receipt-title" class="type-display-lg text-primary">
-            {{ restaurantName || "L'Addition Receipt" }}
-          </h2>
-          <div class="receipt-panel__meta type-label text-muted">
-            <span>{{ receiptDate }}</span>
-            <span aria-hidden="true"></span>
-            <span>{{ currency === 'custom' ? 'Custom' : currency }}</span>
-          </div>
-        </header>
+      <div v-if="isReceiptGenerated" ref="receiptExportFrame" class="receipt-export-frame">
+        <article ref="receiptPanel" class="receipt-panel" aria-labelledby="receipt-title">
+          <header class="receipt-panel__header stack-sm">
+            <h2 id="receipt-title" class="type-display-lg text-primary">
+              {{ restaurantName || "L'Addition Receipt" }}
+            </h2>
+            <div class="receipt-panel__meta type-label text-muted">
+              <span>{{ receiptDate }}</span>
+              <span aria-hidden="true"></span>
+              <span>{{ currency === 'custom' ? 'Custom' : currency }}</span>
+            </div>
+          </header>
 
-        <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
-          <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
-            The Table Breakdown
-          </h3>
+          <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
+            <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
+              The Table Breakdown
+            </h3>
 
-          <div class="receipt-diner-grid">
-            <section
-              v-for="(diner, index) in receiptCalculation.diners"
-              :key="diner.id"
-              class="receipt-diner-card"
-            >
-              <button
-                class="receipt-diner-card__header"
-                type="button"
-                :aria-expanded="isReceiptDinerExpanded(diner.id)"
-                @click="toggleReceiptDiner(diner.id)"
+            <div class="receipt-diner-grid">
+              <section
+                v-for="(diner, index) in receiptCalculation.diners"
+                :key="diner.id"
+                class="receipt-diner-card"
               >
-                <span>{{ diner.name || `Diner ${index + 1}` }}</span>
-                <span class="material-symbols-outlined" aria-hidden="true">
-                  {{ isReceiptDinerExpanded(diner.id) ? 'expand_less' : 'expand_more' }}
-                </span>
-              </button>
+                <button
+                  class="receipt-diner-card__header"
+                  type="button"
+                  :aria-expanded="isReceiptDinerExpanded(diner.id)"
+                  @click="toggleReceiptDiner(diner.id)"
+                >
+                  <span>{{ diner.name || `Diner ${index + 1}` }}</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">
+                    {{ isReceiptDinerExpanded(diner.id) ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
 
-              <ul class="receipt-line-list">
-                <li class="receipt-line">
-                  <span>Food Total</span>
-                  <span aria-hidden="true"></span>
-                  <span>{{ formatCurrency(diner.subtotal) }}</span>
-                </li>
-                <li class="receipt-line">
-                  <span>Fees &amp; VAT</span>
-                  <span aria-hidden="true"></span>
-                  <span>{{ formatCurrency(diner.fees) }}</span>
-                </li>
-                <template v-if="isReceiptDinerExpanded(diner.id)">
-                  <li
-                    v-for="item in diner.items"
-                    :key="`${item.source}-${item.id}`"
-                    class="receipt-line receipt-line--itemized"
-                  >
-                    <span>{{ item.name || 'Untitled item' }}</span>
+                <ul class="receipt-line-list">
+                  <li class="receipt-line">
+                    <span>Food Total</span>
                     <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(item.amount) }}</span>
+                    <span>{{ formatCurrency(diner.subtotal) }}</span>
                   </li>
-                  <li class="receipt-line receipt-line--itemized">
-                    <span>Service</span>
+                  <li class="receipt-line">
+                    <span>Fees &amp; VAT</span>
                     <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.service) }}</span>
+                    <span>{{ formatCurrency(diner.fees) }}</span>
                   </li>
-                  <li class="receipt-line receipt-line--itemized">
-                    <span>VAT</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.tax) }}</span>
-                  </li>
-                  <li v-if="diner.adjustments > 0" class="receipt-line receipt-line--itemized">
-                    <span>Adjustments</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.adjustments) }}</span>
-                  </li>
-                  <li v-if="diner.discount > 0" class="receipt-line receipt-line--itemized">
-                    <span>Discount</span>
-                    <span aria-hidden="true"></span>
-                    <span>-{{ formatCurrency(diner.discount) }}</span>
-                  </li>
-                </template>
-              </ul>
+                  <template v-if="isReceiptDinerExpanded(diner.id)">
+                    <li
+                      v-for="item in diner.items"
+                      :key="`${item.source}-${item.id}`"
+                      class="receipt-line receipt-line--itemized"
+                    >
+                      <span>{{ item.name || 'Untitled item' }}</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatCurrency(item.amount) }}</span>
+                    </li>
+                    <li class="receipt-line receipt-line--itemized">
+                      <span>Service</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatCurrency(diner.service) }}</span>
+                    </li>
+                    <li class="receipt-line receipt-line--itemized">
+                      <span>VAT</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatCurrency(diner.tax) }}</span>
+                    </li>
+                    <li v-if="diner.adjustments > 0" class="receipt-line receipt-line--itemized">
+                      <span>Adjustments</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatCurrency(diner.adjustments) }}</span>
+                    </li>
+                    <li v-if="diner.discount > 0" class="receipt-line receipt-line--itemized">
+                      <span>Discount</span>
+                      <span aria-hidden="true"></span>
+                      <span>-{{ formatCurrency(diner.discount) }}</span>
+                    </li>
+                  </template>
+                </ul>
 
-              <div class="receipt-diner-card__total type-label text-primary">
-                <span>Individual Total</span>
-                <span>{{ formatCurrency(diner.total) }}</span>
+                <div class="receipt-diner-card__total type-label text-primary">
+                  <span>Total</span>
+                  <span>{{ formatCurrency(diner.total) }}</span>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="receipt-summary" aria-label="Receipt total summary">
+            <div class="receipt-summary__inner stack-sm">
+              <div class="totals-row">
+                <span class="type-body-md text-muted">Subtotal</span>
+                <span class="type-number-md text-primary">{{
+                  formatCurrency(receiptCalculation.subtotal)
+                }}</span>
               </div>
-            </section>
-          </div>
-        </section>
+              <div class="totals-row">
+                <span class="type-body-md text-muted">Service</span>
+                <span class="type-number-md text-primary">{{
+                  formatCurrency(receiptCalculation.service)
+                }}</span>
+              </div>
+              <div class="totals-row">
+                <span class="type-body-md text-muted">VAT</span>
+                <span class="type-number-md text-primary">{{
+                  formatCurrency(receiptCalculation.tax)
+                }}</span>
+              </div>
+              <div v-if="receiptCalculation.adjustments > 0" class="totals-row">
+                <span class="type-body-md text-muted">Adjustments</span>
+                <span class="type-number-md text-primary">{{
+                  formatCurrency(receiptCalculation.adjustments)
+                }}</span>
+              </div>
+              <div v-if="receiptCalculation.discount > 0" class="totals-row">
+                <span class="type-body-md text-muted">Discount</span>
+                <span class="type-number-md text-primary"
+                  >-{{ formatCurrency(receiptCalculation.discount) }}</span
+                >
+              </div>
+              <div class="totals-row totals-row--total receipt-summary__total">
+                <span class="type-label text-primary">Grand Total</span>
+                <span class="manual-total-value text-primary">{{
+                  formatCurrency(receiptCalculation.total)
+                }}</span>
+              </div>
+            </div>
+          </section>
 
-        <section class="receipt-summary" aria-label="Receipt total summary">
-          <div class="receipt-summary__inner stack-sm">
-            <div class="totals-row">
-              <span class="type-body-md text-muted">Subtotal</span>
-              <span class="type-number-md text-primary">{{
-                formatCurrency(receiptCalculation.subtotal)
-              }}</span>
-            </div>
-            <div class="totals-row">
-              <span class="type-body-md text-muted">Service</span>
-              <span class="type-number-md text-primary">{{
-                formatCurrency(receiptCalculation.service)
-              }}</span>
-            </div>
-            <div class="totals-row">
-              <span class="type-body-md text-muted">VAT</span>
-              <span class="type-number-md text-primary">{{
-                formatCurrency(receiptCalculation.tax)
-              }}</span>
-            </div>
-            <div v-if="receiptCalculation.adjustments > 0" class="totals-row">
-              <span class="type-body-md text-muted">Adjustments</span>
-              <span class="type-number-md text-primary">{{
-                formatCurrency(receiptCalculation.adjustments)
-              }}</span>
-            </div>
-            <div v-if="receiptCalculation.discount > 0" class="totals-row">
-              <span class="type-body-md text-muted">Discount</span>
-              <span class="type-number-md text-primary"
-                >-{{ formatCurrency(receiptCalculation.discount) }}</span
-              >
-            </div>
-            <div class="totals-row totals-row--total receipt-summary__total">
-              <span class="type-label text-primary">Total Paid</span>
-              <span class="manual-total-value text-primary">{{
-                formatCurrency(receiptCalculation.total)
-              }}</span>
-            </div>
-          </div>
-        </section>
-      </article>
+          <p class="receipt-signature">L'Addition</p>
+        </article>
+      </div>
+
+      <div v-if="isReceiptGenerated" class="receipt-actions">
+        <button class="button button--outline" type="button" @click="downloadReceiptImage">
+          Download Image
+          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+        </button>
+      </div>
     </main>
   </PublicLayout>
 </template>

@@ -1669,14 +1669,80 @@ layer(vendor);
     width: 100%;
   }
 
-  .receipt-panel {
-    width: min(100%, 1000px);
+  .receipt-export-frame {
+    width: min(100%, 1120px);
     margin: var(--space-section) auto 0;
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
-    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(
+        circle at top,
+        color-mix(in srgb, var(--color-secondary-fixed) 18%, transparent),
+        transparent 42%
+      ),
+      var(--color-surface-container-low);
+    padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+  }
+
+  .receipt-panel {
+    position: relative;
+    width: min(100%, 1000px);
+    margin: 0 auto var(--space-sm);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-surface) 92%, var(--color-secondary-fixed)),
+      var(--color-surface-container-lowest)
+    );
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     padding: var(--space-xl) var(--space-lg);
-    box-shadow: var(--shadow-ambient);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .receipt-panel::before {
+    display: block;
+    width: var(--space-xl);
+    height: 1px;
+    margin: 0 auto var(--space-xl);
+    background: var(--color-secondary);
+    content: '';
+  }
+
+  .receipt-panel::after {
+    position: absolute;
+    right: -1px;
+    bottom: calc(var(--space-sm) * -1);
+    left: -1px;
+    height: var(--space-sm);
+    background: inherit;
+    clip-path: polygon(
+      0 0,
+      4% 100%,
+      8% 0,
+      12% 100%,
+      16% 0,
+      20% 100%,
+      24% 0,
+      28% 100%,
+      32% 0,
+      36% 100%,
+      40% 0,
+      44% 100%,
+      48% 0,
+      52% 100%,
+      56% 0,
+      60% 100%,
+      64% 0,
+      68% 100%,
+      72% 0,
+      76% 100%,
+      80% 0,
+      84% 100%,
+      88% 0,
+      92% 100%,
+      96% 0,
+      100% 100%,
+      100% 0
+    );
+    content: '';
   }
 
   .receipt-panel__header {
@@ -1800,6 +1866,22 @@ layer(vendor);
     border-top: var(--border-strong);
     margin-top: var(--space-sm);
     padding-top: var(--space-md);
+  }
+
+  .receipt-signature {
+    margin-top: var(--space-xl);
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-display);
+    font-size: var(--type-headline-sm-size);
+    font-style: italic;
+    line-height: var(--type-headline-sm-line);
+    text-align: center;
+  }
+
+  .receipt-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-lg);
   }
 
   @media (min-width: 768px) {
