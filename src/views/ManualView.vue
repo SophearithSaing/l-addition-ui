@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toPng } from 'html-to-image'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -61,6 +61,7 @@ const isReceiptDownloading = ref(false)
 const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
 const receiptVariant = ref<'classic' | 'polished'>('classic')
+const qrCodeImageUrl = ref<string | null>(null)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -195,20 +196,6 @@ function formatSignedCurrency(amount: number): string {
   }
 
   return `+${formatCurrency(amount)}`
-}
-
-/**
- * Formats a numeric amount with an explicit sign and no currency symbol.
- *
- * @param amount Amount to format.
- * @returns Signed formatted amount label.
- */
-function formatSignedAmount(amount: number): string {
-  if (amount < 0) {
-    return `-${Math.abs(amount).toFixed(2)}`
-  }
-
-  return `+${amount.toFixed(2)}`
 }
 
 /**
@@ -347,6 +334,7 @@ function confirmClearBill(): void {
   adjustments.value = []
   isReceiptGenerated.value = false
   expandedDinerIds.value = []
+  clearQrCodeImage()
   nextDinerId = 1
   nextItemId = 1
   nextSharedItemId = 1
@@ -547,6 +535,35 @@ function isReceiptDinerExpanded(dinerId: number): boolean {
 }
 
 /**
+ * Stores a local QR code image preview for receipt export.
+ *
+ * @param event File input change event.
+ */
+function uploadQrCodeImage(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.addEventListener('load', () => {
+    qrCodeImageUrl.value = String(reader.result)
+  })
+  reader.readAsDataURL(file)
+  input.value = ''
+}
+
+/**
+ * Clears the local QR code image preview.
+ */
+function clearQrCodeImage(): void {
+  qrCodeImageUrl.value = null
+}
+
+/**
  * Expands or collapses every diner receipt breakdown.
  */
 function toggleAllReceiptDiners(): void {
@@ -585,6 +602,10 @@ async function downloadReceiptImage(): Promise<void> {
 
 onMounted(() => {
   loadManualDraft()
+})
+
+onUnmounted(() => {
+  clearQrCodeImage()
 })
 
 watch(
@@ -1112,7 +1133,14 @@ watch(
             </div>
           </section>
 
-          <section class="receipt-summary" aria-label="Receipt total summary">
+          <section
+            class="receipt-summary"
+            :class="{ 'receipt-summary--with-qr': qrCodeImageUrl }"
+            aria-label="Receipt total summary"
+          >
+            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
+              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
+            </aside>
             <div class="receipt-summary__inner stack-sm">
               <div class="totals-row">
                 <span class="type-body-md text-muted">Subtotal</span>
@@ -1236,10 +1264,19 @@ watch(
             </div>
           </section>
 
-          <section class="receipt-polished__hero" aria-label="Grand total">
-            <span class="receipt-polished__hero-label">Grand Total</span>
-            <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
-          </section>
+          <div
+            class="receipt-polished__settlement"
+            :class="{ 'receipt-polished__settlement--with-qr': qrCodeImageUrl }"
+          >
+            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
+              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
+            </aside>
+
+            <section class="receipt-polished__hero" aria-label="Grand total">
+              <span class="receipt-polished__hero-label">Grand Total</span>
+              <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
+            </section>
+          </div>
 
           <footer class="receipt-polished__footer">
             <span aria-hidden="true"></span>
@@ -1260,6 +1297,20 @@ watch(
       />
 
       <div v-if="isReceiptGenerated" class="receipt-actions">
+        <label class="button button--outline receipt-qr-upload">
+          Upload QR Code
+          <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
+          <input accept="image/*" type="file" @change="uploadQrCodeImage" />
+        </label>
+        <button
+          v-if="qrCodeImageUrl"
+          class="button button--ghost"
+          type="button"
+          @click="clearQrCodeImage"
+        >
+          Remove QR
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
         <button
           class="button button--outline"
           type="button"
