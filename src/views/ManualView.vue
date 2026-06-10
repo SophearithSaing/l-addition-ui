@@ -909,13 +909,12 @@ watch(
       <div v-if="isReceiptGenerated" ref="receiptExportFrame" class="receipt-export-frame">
         <article ref="receiptPanel" class="receipt-panel" aria-labelledby="receipt-title">
           <header class="receipt-panel__header stack-sm">
+            <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
             <h2 id="receipt-title" class="type-display-lg text-primary">
               {{ restaurantName || "L'Addition Receipt" }}
             </h2>
             <div class="receipt-panel__meta type-label text-muted">
               <span>{{ receiptDate }}</span>
-              <span aria-hidden="true"></span>
-              <span>{{ currency === 'custom' ? 'Custom' : currency }}</span>
             </div>
           </header>
 
@@ -1044,7 +1043,11 @@ watch(
             </div>
           </section>
 
-          <p class="receipt-signature">L'Addition</p>
+          <footer class="receipt-signature">
+            <span aria-hidden="true"></span>
+            <p>L'Addition</p>
+            <span aria-hidden="true"></span>
+          </footer>
         </article>
       </div>
 
