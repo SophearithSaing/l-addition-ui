@@ -586,9 +586,17 @@ async function downloadReceiptImage(): Promise<void> {
   isReceiptDownloading.value = true
 
   try {
-    const dataUrl = await toPng(receiptExportFrame.value, {
+    const node = receiptExportFrame.value
+    const rect = node.getBoundingClientRect()
+    const dataUrl = await toPng(node, {
       cacheBust: true,
+      height: rect.height,
       pixelRatio: 2,
+      style: {
+        margin: '0',
+        width: `${rect.width}px`,
+      },
+      width: rect.width,
     })
     const link = document.createElement('a')
 
