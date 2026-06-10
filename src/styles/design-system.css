@@ -1875,7 +1875,11 @@ layer(vendor);
   }
 
   .receipt-export-frame--polished {
-    width: min(100%, 760px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 760px;
     background:
       radial-gradient(
         circle at top left,
@@ -2163,8 +2167,9 @@ layer(vendor);
   .receipt-polished {
     position: relative;
     display: flex;
-    width: min(100%, 640px);
-    margin: 0 auto;
+    max-width: 640px;
+    width: 100%;
+    margin: 0;
     flex-direction: column;
     gap: var(--space-lg);
     background: var(--color-surface-container-lowest);
@@ -2430,7 +2435,7 @@ layer(vendor);
     background: var(--color-surface-container-lowest);
     color: var(--color-secondary);
     font-family: var(--font-display);
-    font-size: var(--type-headline-sm-size);
+    font-size: var(--type-label-sm-size);
     font-style: italic;
     font-weight: var(--type-headline-md-weight);
     letter-spacing: 0;
