@@ -2,6 +2,7 @@
 import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
+import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -62,6 +63,8 @@ const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
 const receiptVariant = ref<'classic' | 'polished'>('classic')
 const qrCodeImageUrl = ref<string | null>(null)
+const qrCropImageSrc = ref<string | null>(null)
+const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -535,7 +538,7 @@ function isReceiptDinerExpanded(dinerId: number): boolean {
 }
 
 /**
- * Stores a local QR code image preview for receipt export.
+ * Reads a QR code image and opens the crop dialog.
  *
  * @param event File input change event.
  */
@@ -550,10 +553,30 @@ function uploadQrCodeImage(event: Event): void {
   const reader = new FileReader()
 
   reader.addEventListener('load', () => {
-    qrCodeImageUrl.value = String(reader.result)
+    qrCropImageSrc.value = String(reader.result)
+    isQrCropDialogOpen.value = true
   })
   reader.readAsDataURL(file)
   input.value = ''
+}
+
+/**
+ * Applies the cropped QR code image to the receipt.
+ *
+ * @param croppedDataUrl Cropped image data URL.
+ */
+function confirmQrCrop(croppedDataUrl: string): void {
+  qrCodeImageUrl.value = croppedDataUrl
+  isQrCropDialogOpen.value = false
+  qrCropImageSrc.value = null
+}
+
+/**
+ * Cancels the QR code crop and closes the dialog.
+ */
+function cancelQrCrop(): void {
+  isQrCropDialogOpen.value = false
+  qrCropImageSrc.value = null
 }
 
 /**
@@ -1302,6 +1325,13 @@ watch(
         cancel-label="Keep"
         @confirm="confirmClearBill"
         @cancel="closeClearDialog"
+      />
+
+      <QrCropDialog
+        :is-open="isQrCropDialogOpen"
+        :image-src="qrCropImageSrc ?? ''"
+        @confirm="confirmQrCrop"
+        @cancel="cancelQrCrop"
       />
 
       <div v-if="isReceiptGenerated" class="receipt-actions">

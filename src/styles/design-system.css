@@ -1811,6 +1811,22 @@ layer(vendor);
     gap: var(--space-sm);
   }
 
+  .dialog-panel--crop {
+    width: min(100%, 560px);
+  }
+
+  .qr-crop-container {
+    height: 320px;
+    border: var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .qr-crop-cropper {
+    width: 100%;
+    height: 100%;
+  }
+
   .receipt-variant-controls {
     display: flex;
     flex-direction: column;
@@ -2498,6 +2514,10 @@ layer(vendor);
 
     .recent-card-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .qr-crop-container {
+      height: 400px;
     }
 
     .receipt-export-frame {
