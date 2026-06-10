@@ -129,9 +129,15 @@ export function calculateReceipt(input: ReceiptCalculationInput): ReceiptCalcula
     const dinerSubtotal = dinerSubtotals.get(diner.id) ?? 0
     const dinerService = dinerSubtotal * (input.serviceRate / 100)
     const dinerTax = (dinerSubtotal + dinerService) * (input.taxRate / 100)
-    const dinerAdjustments = allocateAmount(adjustments, dinerSubtotal, subtotal)
+    const dinerAdjustments = allocateEqualAmount(adjustments, input.diners.length)
     const dinerPreDiscountTotal = dinerSubtotal + dinerService + dinerTax + dinerAdjustments
-    const dinerDiscount = allocateAmount(discount, dinerPreDiscountTotal, preDiscountTotal)
+    const dinerDiscount = getDinerDiscount(
+      input.discount,
+      discount,
+      dinerPreDiscountTotal,
+      preDiscountTotal,
+      input.diners.length,
+    )
     const dinerTotal = Math.max(0, dinerPreDiscountTotal - dinerDiscount)
 
     return {
@@ -172,6 +178,45 @@ function getDiscountAmount(discount: ReceiptDiscountInput, preDiscountTotal: num
   }
 
   return discount.amount
+}
+
+/**
+ * Calculates a diner-level discount allocation.
+ *
+ * @param discount Discount input.
+ * @param discountAmount Effective total discount amount.
+ * @param dinerPreDiscountTotal Diner total before discount.
+ * @param preDiscountTotal Bill total before discount.
+ * @param dinerCount Number of diners receiving fixed discounts.
+ * @returns Diner discount allocation.
+ */
+function getDinerDiscount(
+  discount: ReceiptDiscountInput,
+  discountAmount: number,
+  dinerPreDiscountTotal: number,
+  preDiscountTotal: number,
+  dinerCount: number,
+): number {
+  if (discount.unit === 'fixed') {
+    return allocateEqualAmount(discountAmount, dinerCount)
+  }
+
+  return allocateAmount(discountAmount, dinerPreDiscountTotal, preDiscountTotal)
+}
+
+/**
+ * Allocates a total amount equally.
+ *
+ * @param amount Total amount to allocate.
+ * @param count Number of allocations.
+ * @returns Equal allocation.
+ */
+function allocateEqualAmount(amount: number, count: number): number {
+  if (count <= 0) {
+    return 0
+  }
+
+  return amount / count
 }
 
 /**

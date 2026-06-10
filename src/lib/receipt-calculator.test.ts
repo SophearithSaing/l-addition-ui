@@ -95,6 +95,46 @@ describe('calculateReceipt', () => {
     assertAmount(alice.total + bob.total, receipt.total)
   })
 
+  it('allocates fixed adjustments and discounts equally', () => {
+    const receipt = calculateReceipt({
+      adjustments: [{ amount: 12, id: 1, label: 'Corkage' }],
+      diners: [
+        {
+          id: 1,
+          items: [{ amount: 90, id: 1, name: 'Lobster' }],
+          name: 'Alice',
+        },
+        {
+          id: 2,
+          items: [{ amount: 30, id: 2, name: 'Salad' }],
+          name: 'Bob',
+        },
+      ],
+      discount: { amount: 10, unit: 'fixed' },
+      serviceRate: 0,
+      sharedItems: [],
+      taxRate: 0,
+    })
+
+    const alice = receipt.diners[0]
+    const bob = receipt.diners[1]
+
+    expect(alice).toBeDefined()
+    expect(bob).toBeDefined()
+
+    if (!alice || !bob) {
+      return
+    }
+
+    assertAmount(alice.adjustments, 6)
+    assertAmount(bob.adjustments, 6)
+    assertAmount(alice.discount, 5)
+    assertAmount(bob.discount, 5)
+    assertAmount(alice.total, 91)
+    assertAmount(bob.total, 31)
+    assertAmount(alice.total + bob.total, receipt.total)
+  })
+
   it('applies percentage discounts proportionally and preserves total equality', () => {
     const receipt = calculateReceipt({
       adjustments: [{ amount: 10, id: 1, label: 'Corkage' }],
