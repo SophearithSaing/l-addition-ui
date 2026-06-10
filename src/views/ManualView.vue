@@ -1045,7 +1045,6 @@ watch(
             Polished
           </button>
         </div>
-        <p class="receipt-variant-disclaimer">Polished receipt version is in public beta.</p>
       </div>
 
       <div

@@ -47,7 +47,7 @@ function confirmCrop(): void {
             Adjust QR Code
           </h2>
           <p class="type-body-md text-muted">
-            Pan and zoom to frame the QR code.
+            Make sure the QR code is fully visible. Drag, resize, or zoom to adjust.
           </p>
         </div>
 
@@ -74,7 +74,7 @@ function confirmCrop(): void {
             type="button"
             @click="confirmCrop"
           >
-            Crop & Use
+            Crop
           </button>
         </div>
       </section>
