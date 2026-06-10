@@ -60,6 +60,7 @@ const isReceiptGenerated = ref(false)
 const isReceiptDownloading = ref(false)
 const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
+const receiptVariant = ref<'classic' | 'polished'>('classic')
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -194,6 +195,44 @@ function formatSignedCurrency(amount: number): string {
   }
 
   return `+${formatCurrency(amount)}`
+}
+
+/**
+ * Formats a numeric amount with an explicit sign and no currency symbol.
+ *
+ * @param amount Amount to format.
+ * @returns Signed formatted amount label.
+ */
+function formatSignedAmount(amount: number): string {
+  if (amount < 0) {
+    return `-${Math.abs(amount).toFixed(2)}`
+  }
+
+  return `+${amount.toFixed(2)}`
+}
+
+/**
+ * Gets the sign for an amount.
+ *
+ * @param amount Amount to inspect.
+ * @returns Minus sign for negative amounts, otherwise plus sign.
+ */
+function getAmountSign(amount: number): string {
+  if (amount < 0) {
+    return '-'
+  }
+
+  return '+'
+}
+
+/**
+ * Formats an absolute amount without a currency symbol.
+ *
+ * @param amount Amount to format.
+ * @returns Absolute formatted amount label.
+ */
+function formatAbsoluteAmount(amount: number): string {
+  return Math.abs(amount).toFixed(2)
 }
 
 /**
@@ -933,8 +972,42 @@ watch(
         </aside>
       </div>
 
-      <div v-if="isReceiptGenerated" ref="receiptExportFrame" class="receipt-export-frame">
-        <article ref="receiptPanel" class="receipt-panel" aria-labelledby="receipt-title">
+      <div v-if="isReceiptGenerated" class="receipt-variant-controls">
+        <div class="receipt-variant-switch" aria-label="Receipt style">
+          <button
+            class="receipt-variant-switch__option"
+            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'classic' }"
+            type="button"
+            :aria-pressed="receiptVariant === 'classic'"
+            @click="receiptVariant = 'classic'"
+          >
+            Classic
+          </button>
+          <button
+            class="receipt-variant-switch__option"
+            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'polished' }"
+            type="button"
+            :aria-pressed="receiptVariant === 'polished'"
+            @click="receiptVariant = 'polished'"
+          >
+            Polished
+          </button>
+        </div>
+        <p class="receipt-variant-disclaimer">Polished receipt version is in public beta.</p>
+      </div>
+
+      <div
+        v-if="isReceiptGenerated"
+        ref="receiptExportFrame"
+        class="receipt-export-frame"
+        :class="{ 'receipt-export-frame--polished': receiptVariant === 'polished' }"
+      >
+        <article
+          v-if="receiptVariant === 'classic'"
+          ref="receiptPanel"
+          class="receipt-panel"
+          aria-labelledby="receipt-title"
+        >
           <header class="receipt-panel__header stack-sm">
             <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
             <h2 id="receipt-title" class="type-display-lg text-primary">
@@ -1087,6 +1160,88 @@ watch(
           </section>
 
           <footer class="receipt-signature">
+            <span aria-hidden="true"></span>
+            <p>L'Addition</p>
+            <span aria-hidden="true"></span>
+          </footer>
+        </article>
+
+        <article
+          v-else
+          ref="receiptPanel"
+          class="receipt-polished"
+          aria-labelledby="polished-title"
+        >
+          <header class="receipt-polished__header">
+            <img class="receipt-polished__logo" src="/receipt-logo.png" alt="L'Addition" />
+            <h2 id="polished-title" class="receipt-polished__title">
+              {{ restaurantName || "L'Addition" }}
+            </h2>
+            <div class="receipt-polished__header-divider type-label text-muted">
+              <span aria-hidden="true"></span>
+              <span>{{ receiptDate }}</span>
+              <span aria-hidden="true"></span>
+            </div>
+          </header>
+
+          <section class="receipt-polished__guest-list" aria-label="Guest totals">
+            <div class="receipt-polished__guest receipt-polished__guest--header">
+              <span>Name</span>
+              <span>Details</span>
+              <span>Subtotal</span>
+            </div>
+            <article
+              v-for="(diner, index) in receiptCalculation.diners"
+              :key="diner.id"
+              class="receipt-polished__guest"
+            >
+              <h3>{{ diner.name || `Diner ${index + 1}` }}</h3>
+              <p>
+                {{ diner.subtotal.toFixed(2) }}
+                <span v-if="diner.fees !== 0" class="receipt-polished__detail-adjustment">
+                  <span>{{ getAmountSign(diner.fees) }}</span>
+                  <span>{{ formatAbsoluteAmount(diner.fees) }}</span>
+                </span>
+                <span v-if="isRoundingEnabled" class="receipt-polished__detail-adjustment">
+                  <span>{{ getAmountSign(diner.rounding) }}</span>
+                  <span>{{ formatAbsoluteAmount(diner.rounding) }}</span>
+                </span>
+              </p>
+              <strong>{{ formatCurrency(diner.total) }}</strong>
+            </article>
+          </section>
+
+          <section class="receipt-polished__summary" aria-label="Receipt summary">
+            <div>
+              <span>Subtotal</span>
+              <strong>{{ formatCurrency(receiptCalculation.subtotal) }}</strong>
+            </div>
+            <div>
+              <span>Service &amp; VAT</span>
+              <strong>{{
+                formatCurrency(receiptCalculation.service + receiptCalculation.tax)
+              }}</strong>
+            </div>
+            <div v-if="receiptCalculation.adjustments > 0">
+              <span>Adjustments</span>
+              <strong>{{ formatCurrency(receiptCalculation.adjustments) }}</strong>
+            </div>
+            <div v-if="receiptCalculation.discount > 0">
+              <span>Discount</span>
+              <strong>-{{ formatCurrency(receiptCalculation.discount) }}</strong>
+            </div>
+            <div v-if="isRoundingEnabled">
+              <span>Rounding</span>
+              <strong>{{ formatSignedCurrency(receiptCalculation.rounding) }}</strong>
+            </div>
+          </section>
+
+          <section class="receipt-polished__hero" aria-label="Grand total">
+            <span class="receipt-polished__hero-label">Grand Total</span>
+            <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
+          </section>
+
+          <footer class="receipt-polished__footer">
             <span aria-hidden="true"></span>
             <p>L'Addition</p>
             <span aria-hidden="true"></span>
