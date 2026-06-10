@@ -1667,6 +1667,81 @@ layer(vendor);
     color: var(--color-on-surface);
   }
 
+  .summary-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    border-bottom: var(--border-subtle);
+    color: var(--color-on-surface);
+    padding-block: var(--space-xs);
+  }
+
+  .summary-toggle-row > span:first-child {
+    font-size: var(--type-body-md-size);
+    line-height: var(--type-body-md-line);
+  }
+
+  .summary-switch-control {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-on-surface-variant);
+  }
+
+  .summary-switch-control small {
+    font-size: var(--type-label-sm-size);
+    line-height: var(--type-label-sm-line);
+  }
+
+  .summary-switch-control {
+    position: relative;
+  }
+
+  .summary-switch-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .summary-switch-control span {
+    position: relative;
+    width: var(--space-xl);
+    height: var(--space-md);
+    border: var(--border-subtle);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-container-highest);
+    transition:
+      background var(--motion-smooth),
+      border-color var(--motion-smooth);
+  }
+
+  .summary-switch-control span::after {
+    position: absolute;
+    top: 50%;
+    left: var(--space-2xs);
+    width: var(--space-sm);
+    height: var(--space-sm);
+    border-radius: var(--radius-pill);
+    background: var(--color-outline);
+    content: '';
+    transform: translateY(-50%);
+    transition:
+      background var(--motion-smooth),
+      transform var(--motion-smooth);
+  }
+
+  .summary-switch-control input:checked + span {
+    border-color: var(--color-secondary);
+    background: var(--color-secondary-fixed);
+  }
+
+  .summary-switch-control input:checked + span::after {
+    background: var(--color-secondary);
+    transform: translate(calc(var(--space-md) - var(--space-2xs)), -50%);
+  }
+
   .summary-input-row--editable {
     gap: var(--space-xs);
   }

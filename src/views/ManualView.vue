@@ -38,6 +38,7 @@ interface ManualDraftState {
   taxRate: string
   discount: string
   discountUnit: 'fixed' | 'percentage'
+  isRoundingEnabled: boolean
   diners: ManualDiner[]
   sharedItems: SharedItem[]
   adjustments: ManualAdjustment[]
@@ -51,6 +52,7 @@ const serviceCharge = ref('')
 const taxRate = ref('')
 const discount = ref('')
 const discountUnit = ref<'fixed' | 'percentage'>('fixed')
+const isRoundingEnabled = ref(true)
 const diners = ref<ManualDiner[]>([])
 const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
@@ -86,6 +88,7 @@ const receiptCalculation = computed(() => {
       amount: parseAmount(discount.value),
       unit: discountUnit.value,
     },
+    rounding: isRoundingEnabled.value ? { unit: 1 } : undefined,
     serviceRate: parseAmount(serviceCharge.value),
     sharedItems: sharedItems.value.map((item) => ({
       amount: parseAmount(item.amount),
@@ -110,6 +113,7 @@ const hasBillData = computed(() => {
     Number(serviceCharge.value) > 0 ||
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
+    isRoundingEnabled.value !== true ||
     currency.value !== 'THB' ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
@@ -179,6 +183,20 @@ function formatCurrency(amount: number): string {
 }
 
 /**
+ * Formats a numeric amount with an explicit sign.
+ *
+ * @param amount Amount to format.
+ * @returns Signed formatted currency label.
+ */
+function formatSignedCurrency(amount: number): string {
+  if (amount < 0) {
+    return `-${formatCurrency(Math.abs(amount))}`
+  }
+
+  return `+${formatCurrency(amount)}`
+}
+
+/**
  * Builds the current manual bill draft for persistence.
  *
  * @returns Serializable manual bill draft.
@@ -191,6 +209,7 @@ function getManualDraftState(): ManualDraftState {
     diners: diners.value,
     discount: discount.value,
     discountUnit: discountUnit.value,
+    isRoundingEnabled: isRoundingEnabled.value,
     restaurantName: restaurantName.value,
     serviceCharge: serviceCharge.value,
     sharedItems: sharedItems.value,
@@ -210,6 +229,7 @@ function restoreManualDraftState(draft: ManualDraftState): void {
   diners.value = draft.diners ?? []
   discount.value = draft.discount ?? ''
   discountUnit.value = draft.discountUnit ?? 'fixed'
+  isRoundingEnabled.value = draft.isRoundingEnabled ?? true
   restaurantName.value = draft.restaurantName ?? ''
   serviceCharge.value = draft.serviceCharge ?? ''
   sharedItems.value = draft.sharedItems ?? []
@@ -282,6 +302,7 @@ function confirmClearBill(): void {
   taxRate.value = ''
   discount.value = ''
   discountUnit.value = 'fixed'
+  isRoundingEnabled.value = true
   diners.value = []
   sharedItems.value = []
   adjustments.value = []
@@ -858,9 +879,15 @@ watch(
               <span class="material-symbols-outlined" aria-hidden="true">add</span>
               Add Adjustment
             </button>
+            <label class="summary-toggle-row summary-toggle-row--switch">
+              <span>Round Totals</span>
+              <span class="summary-switch-control">
+                <small>Nearest {{ currencySymbol }}</small>
+                <input v-model="isRoundingEnabled" type="checkbox" />
+                <span aria-hidden="true"></span>
+              </span>
+            </label>
           </section>
-
-          <div class="divider"></div>
 
           <section class="stack-sm">
             <div class="totals-row">
@@ -961,6 +988,11 @@ watch(
                     <span aria-hidden="true"></span>
                     <span>{{ formatCurrency(diner.fees) }}</span>
                   </li>
+                  <li v-if="isRoundingEnabled" class="receipt-line">
+                    <span>Rounding</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatSignedCurrency(diner.rounding) }}</span>
+                  </li>
                   <template v-if="isReceiptDinerExpanded(diner.id)">
                     <li
                       v-for="item in diner.items"
@@ -990,6 +1022,11 @@ watch(
                       <span>Discount</span>
                       <span aria-hidden="true"></span>
                       <span>-{{ formatCurrency(diner.discount) }}</span>
+                    </li>
+                    <li v-if="isRoundingEnabled" class="receipt-line receipt-line--itemized">
+                      <span>Rounding</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatSignedCurrency(diner.rounding) }}</span>
                     </li>
                   </template>
                 </ul>
@@ -1033,6 +1070,12 @@ watch(
                 <span class="type-number-md text-primary"
                   >-{{ formatCurrency(receiptCalculation.discount) }}</span
                 >
+              </div>
+              <div v-if="isRoundingEnabled" class="totals-row">
+                <span class="type-body-md text-muted">Rounding</span>
+                <span class="type-number-md text-primary">{{
+                  formatSignedCurrency(receiptCalculation.rounding)
+                }}</span>
               </div>
               <div class="totals-row totals-row--total receipt-summary__total">
                 <span class="type-label text-primary">Grand Total</span>
