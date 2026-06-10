@@ -27,6 +27,10 @@ export interface ReceiptDiscountInput {
   unit: AdjustmentUnit
 }
 
+export interface ReceiptRoundingInput {
+  unit: number
+}
+
 export interface ReceiptCalculationInput {
   diners: ReceiptDinerInput[]
   sharedItems: ReceiptSharedItemInput[]
@@ -34,6 +38,7 @@ export interface ReceiptCalculationInput {
   taxRate: number
   adjustments: ReceiptAdjustmentInput[]
   discount: ReceiptDiscountInput
+  rounding?: ReceiptRoundingInput
 }
 
 export interface ReceiptLineItem {
@@ -53,6 +58,8 @@ export interface ReceiptDinerTotal {
   adjustments: number
   discount: number
   fees: number
+  exactTotal: number
+  rounding: number
   total: number
 }
 
@@ -63,6 +70,8 @@ export interface ReceiptCalculation {
   tax: number
   adjustments: number
   discount: number
+  exactTotal: number
+  rounding: number
   total: number
 }
 
@@ -123,40 +132,129 @@ export function calculateReceipt(input: ReceiptCalculationInput): ReceiptCalcula
   const adjustments = input.adjustments.reduce((total, adjustment) => total + adjustment.amount, 0)
   const preDiscountTotal = subtotal + service + tax + adjustments
   const discount = getDiscountAmount(input.discount, preDiscountTotal)
-  const total = Math.max(0, preDiscountTotal - discount)
+  const exactTotal = Math.max(0, preDiscountTotal - discount)
 
-  const diners = input.diners.map((diner) => {
+  const exactDiners = input.diners.map((diner) => {
     const dinerSubtotal = dinerSubtotals.get(diner.id) ?? 0
     const dinerService = dinerSubtotal * (input.serviceRate / 100)
     const dinerTax = (dinerSubtotal + dinerService) * (input.taxRate / 100)
-    const dinerAdjustments = allocateAmount(adjustments, dinerSubtotal, subtotal)
+    const dinerAdjustments = allocateEqualAmount(adjustments, input.diners.length)
     const dinerPreDiscountTotal = dinerSubtotal + dinerService + dinerTax + dinerAdjustments
-    const dinerDiscount = allocateAmount(discount, dinerPreDiscountTotal, preDiscountTotal)
+    const dinerDiscount = getDinerDiscount(
+      input.discount,
+      discount,
+      dinerPreDiscountTotal,
+      preDiscountTotal,
+      input.diners.length,
+    )
     const dinerTotal = Math.max(0, dinerPreDiscountTotal - dinerDiscount)
 
     return {
       adjustments: dinerAdjustments,
       discount: dinerDiscount,
+      exactTotal: dinerTotal,
       fees: dinerService + dinerTax + dinerAdjustments - dinerDiscount,
       id: diner.id,
       items: dinerItems.get(diner.id) ?? [],
       name: diner.name,
+      rounding: 0,
       service: dinerService,
       subtotal: dinerSubtotal,
       tax: dinerTax,
       total: dinerTotal,
     }
   })
+  const roundedReceipt = applyNearestRounding(exactDiners, exactTotal, input.rounding)
 
   return {
     adjustments,
-    diners,
+    diners: roundedReceipt.diners,
     discount,
+    exactTotal,
+    rounding: roundedReceipt.rounding,
     service,
     subtotal,
     tax,
-    total,
+    total: roundedReceipt.total,
   }
+}
+
+/**
+ * Applies nearest-unit rounding after exact totals are calculated.
+ *
+ * @param diners Exact diner totals.
+ * @param exactTotal Exact receipt total.
+ * @param rounding Rounding settings.
+ * @returns Rounded receipt totals.
+ */
+function applyNearestRounding(
+  diners: ReceiptDinerTotal[],
+  exactTotal: number,
+  rounding?: ReceiptRoundingInput,
+): Pick<ReceiptCalculation, 'diners' | 'rounding' | 'total'> {
+  const roundingUnit = rounding?.unit ?? 0
+
+  if (roundingUnit <= 0 || diners.length === 0) {
+    return {
+      diners,
+      rounding: 0,
+      total: exactTotal,
+    }
+  }
+
+  const roundedTotal = roundToNearestUnit(exactTotal, roundingUnit)
+  const baseAllocations = diners.map((diner, index) => {
+    const baseTotal = Math.floor(diner.exactTotal / roundingUnit) * roundingUnit
+
+    return {
+      baseTotal,
+      diner,
+      index,
+      remainder: diner.exactTotal - baseTotal,
+    }
+  })
+  const baseTotal = baseAllocations.reduce((total, allocation) => total + allocation.baseTotal, 0)
+  const unitCount = Math.round((roundedTotal - baseTotal) / roundingUnit)
+  const roundedDinerTotals = new Map<number, number>()
+
+  ;[...baseAllocations]
+    .sort((first, second) => {
+      if (second.remainder === first.remainder) {
+        return first.index - second.index
+      }
+
+      return second.remainder - first.remainder
+    })
+    .forEach((allocation, index) => {
+      const roundedDinerTotal = allocation.baseTotal + (index < unitCount ? roundingUnit : 0)
+
+      roundedDinerTotals.set(allocation.diner.id, roundedDinerTotal)
+    })
+
+  return {
+    diners: diners.map((diner) => {
+      const roundedDinerTotal = roundedDinerTotals.get(diner.id) ?? diner.exactTotal
+
+      return {
+        ...diner,
+        rounding: roundedDinerTotal - diner.exactTotal,
+        total: roundedDinerTotal,
+      }
+    }),
+    rounding: roundedTotal - exactTotal,
+    total: roundedTotal,
+  }
+}
+
+/**
+ * Rounds an amount to the nearest unit.
+ *
+ * @param amount Amount to round.
+ * @param unit Rounding unit.
+ * @returns Rounded amount.
+ */
+function roundToNearestUnit(amount: number, unit: number): number {
+  return Math.round(amount / unit) * unit
 }
 
 /**
@@ -172,6 +270,45 @@ function getDiscountAmount(discount: ReceiptDiscountInput, preDiscountTotal: num
   }
 
   return discount.amount
+}
+
+/**
+ * Calculates a diner-level discount allocation.
+ *
+ * @param discount Discount input.
+ * @param discountAmount Effective total discount amount.
+ * @param dinerPreDiscountTotal Diner total before discount.
+ * @param preDiscountTotal Bill total before discount.
+ * @param dinerCount Number of diners receiving fixed discounts.
+ * @returns Diner discount allocation.
+ */
+function getDinerDiscount(
+  discount: ReceiptDiscountInput,
+  discountAmount: number,
+  dinerPreDiscountTotal: number,
+  preDiscountTotal: number,
+  dinerCount: number,
+): number {
+  if (discount.unit === 'fixed') {
+    return allocateEqualAmount(discountAmount, dinerCount)
+  }
+
+  return allocateAmount(discountAmount, dinerPreDiscountTotal, preDiscountTotal)
+}
+
+/**
+ * Allocates a total amount equally.
+ *
+ * @param amount Total amount to allocate.
+ * @param count Number of allocations.
+ * @returns Equal allocation.
+ */
+function allocateEqualAmount(amount: number, count: number): number {
+  if (count <= 0) {
+    return 0
+  }
+
+  return amount / count
 }
 
 /**

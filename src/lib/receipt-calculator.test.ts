@@ -95,6 +95,98 @@ describe('calculateReceipt', () => {
     assertAmount(alice.total + bob.total, receipt.total)
   })
 
+  it('allocates fixed adjustments and discounts equally', () => {
+    const receipt = calculateReceipt({
+      adjustments: [{ amount: 12, id: 1, label: 'Corkage' }],
+      diners: [
+        {
+          id: 1,
+          items: [{ amount: 90, id: 1, name: 'Lobster' }],
+          name: 'Alice',
+        },
+        {
+          id: 2,
+          items: [{ amount: 30, id: 2, name: 'Salad' }],
+          name: 'Bob',
+        },
+      ],
+      discount: { amount: 10, unit: 'fixed' },
+      serviceRate: 0,
+      sharedItems: [],
+      taxRate: 0,
+    })
+
+    const alice = receipt.diners[0]
+    const bob = receipt.diners[1]
+
+    expect(alice).toBeDefined()
+    expect(bob).toBeDefined()
+
+    if (!alice || !bob) {
+      return
+    }
+
+    assertAmount(alice.adjustments, 6)
+    assertAmount(bob.adjustments, 6)
+    assertAmount(alice.discount, 5)
+    assertAmount(bob.discount, 5)
+    assertAmount(alice.total, 91)
+    assertAmount(bob.total, 31)
+    assertAmount(alice.total + bob.total, receipt.total)
+  })
+
+  it('rounds diner totals with largest remainders and reports rounding amounts', () => {
+    const receipt = calculateReceipt({
+      adjustments: [],
+      diners: [
+        {
+          id: 1,
+          items: [{ amount: 100.73, id: 1, name: 'Steak' }],
+          name: 'Alice',
+        },
+        {
+          id: 2,
+          items: [{ amount: 100.73, id: 2, name: 'Pasta' }],
+          name: 'Bob',
+        },
+        {
+          id: 3,
+          items: [{ amount: 100.54, id: 3, name: 'Fish' }],
+          name: 'Cara',
+        },
+      ],
+      discount: { amount: 0, unit: 'fixed' },
+      rounding: { unit: 1 },
+      serviceRate: 0,
+      sharedItems: [],
+      taxRate: 0,
+    })
+
+    const alice = receipt.diners[0]
+    const bob = receipt.diners[1]
+    const cara = receipt.diners[2]
+
+    expect(alice).toBeDefined()
+    expect(bob).toBeDefined()
+    expect(cara).toBeDefined()
+
+    if (!alice || !bob || !cara) {
+      return
+    }
+
+    assertAmount(receipt.exactTotal, 302)
+    assertAmount(receipt.rounding, 0)
+    assertAmount(receipt.total, 302)
+    assertAmount(alice.exactTotal, 100.73)
+    assertAmount(alice.rounding, 0.27)
+    assertAmount(alice.total, 101)
+    assertAmount(bob.rounding, 0.27)
+    assertAmount(bob.total, 101)
+    assertAmount(cara.rounding, -0.54)
+    assertAmount(cara.total, 100)
+    assertAmount(alice.total + bob.total + cara.total, receipt.total)
+  })
+
   it('applies percentage discounts proportionally and preserves total equality', () => {
     const receipt = calculateReceipt({
       adjustments: [{ amount: 10, id: 1, label: 'Corkage' }],

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toPng } from 'html-to-image'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -38,6 +38,7 @@ interface ManualDraftState {
   taxRate: string
   discount: string
   discountUnit: 'fixed' | 'percentage'
+  isRoundingEnabled: boolean
   diners: ManualDiner[]
   sharedItems: SharedItem[]
   adjustments: ManualAdjustment[]
@@ -51,6 +52,7 @@ const serviceCharge = ref('')
 const taxRate = ref('')
 const discount = ref('')
 const discountUnit = ref<'fixed' | 'percentage'>('fixed')
+const isRoundingEnabled = ref(true)
 const diners = ref<ManualDiner[]>([])
 const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
@@ -58,6 +60,8 @@ const isReceiptGenerated = ref(false)
 const isReceiptDownloading = ref(false)
 const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
+const receiptVariant = ref<'classic' | 'polished'>('classic')
+const qrCodeImageUrl = ref<string | null>(null)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
 const receiptExportFrame = ref<HTMLElement | null>(null)
@@ -86,6 +90,7 @@ const receiptCalculation = computed(() => {
       amount: parseAmount(discount.value),
       unit: discountUnit.value,
     },
+    rounding: isRoundingEnabled.value ? { unit: 1 } : undefined,
     serviceRate: parseAmount(serviceCharge.value),
     sharedItems: sharedItems.value.map((item) => ({
       amount: parseAmount(item.amount),
@@ -110,6 +115,7 @@ const hasBillData = computed(() => {
     Number(serviceCharge.value) > 0 ||
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
+    isRoundingEnabled.value !== true ||
     currency.value !== 'THB' ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
@@ -179,6 +185,44 @@ function formatCurrency(amount: number): string {
 }
 
 /**
+ * Formats a numeric amount with an explicit sign.
+ *
+ * @param amount Amount to format.
+ * @returns Signed formatted currency label.
+ */
+function formatSignedCurrency(amount: number): string {
+  if (amount < 0) {
+    return `-${formatCurrency(Math.abs(amount))}`
+  }
+
+  return `+${formatCurrency(amount)}`
+}
+
+/**
+ * Gets the sign for an amount.
+ *
+ * @param amount Amount to inspect.
+ * @returns Minus sign for negative amounts, otherwise plus sign.
+ */
+function getAmountSign(amount: number): string {
+  if (amount < 0) {
+    return '-'
+  }
+
+  return '+'
+}
+
+/**
+ * Formats an absolute amount without a currency symbol.
+ *
+ * @param amount Amount to format.
+ * @returns Absolute formatted amount label.
+ */
+function formatAbsoluteAmount(amount: number): string {
+  return Math.abs(amount).toFixed(2)
+}
+
+/**
  * Builds the current manual bill draft for persistence.
  *
  * @returns Serializable manual bill draft.
@@ -191,6 +235,7 @@ function getManualDraftState(): ManualDraftState {
     diners: diners.value,
     discount: discount.value,
     discountUnit: discountUnit.value,
+    isRoundingEnabled: isRoundingEnabled.value,
     restaurantName: restaurantName.value,
     serviceCharge: serviceCharge.value,
     sharedItems: sharedItems.value,
@@ -210,6 +255,7 @@ function restoreManualDraftState(draft: ManualDraftState): void {
   diners.value = draft.diners ?? []
   discount.value = draft.discount ?? ''
   discountUnit.value = draft.discountUnit ?? 'fixed'
+  isRoundingEnabled.value = draft.isRoundingEnabled ?? true
   restaurantName.value = draft.restaurantName ?? ''
   serviceCharge.value = draft.serviceCharge ?? ''
   sharedItems.value = draft.sharedItems ?? []
@@ -282,11 +328,13 @@ function confirmClearBill(): void {
   taxRate.value = ''
   discount.value = ''
   discountUnit.value = 'fixed'
+  isRoundingEnabled.value = true
   diners.value = []
   sharedItems.value = []
   adjustments.value = []
   isReceiptGenerated.value = false
   expandedDinerIds.value = []
+  clearQrCodeImage()
   nextDinerId = 1
   nextItemId = 1
   nextSharedItemId = 1
@@ -487,6 +535,35 @@ function isReceiptDinerExpanded(dinerId: number): boolean {
 }
 
 /**
+ * Stores a local QR code image preview for receipt export.
+ *
+ * @param event File input change event.
+ */
+function uploadQrCodeImage(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.addEventListener('load', () => {
+    qrCodeImageUrl.value = String(reader.result)
+  })
+  reader.readAsDataURL(file)
+  input.value = ''
+}
+
+/**
+ * Clears the local QR code image preview.
+ */
+function clearQrCodeImage(): void {
+  qrCodeImageUrl.value = null
+}
+
+/**
  * Expands or collapses every diner receipt breakdown.
  */
 function toggleAllReceiptDiners(): void {
@@ -525,6 +602,10 @@ async function downloadReceiptImage(): Promise<void> {
 
 onMounted(() => {
   loadManualDraft()
+})
+
+onUnmounted(() => {
+  clearQrCodeImage()
 })
 
 watch(
@@ -858,9 +939,15 @@ watch(
               <span class="material-symbols-outlined" aria-hidden="true">add</span>
               Add Adjustment
             </button>
+            <label class="summary-toggle-row summary-toggle-row--switch">
+              <span>Round Totals</span>
+              <span class="summary-switch-control">
+                <small>Nearest {{ currencySymbol }}</small>
+                <input v-model="isRoundingEnabled" type="checkbox" />
+                <span aria-hidden="true"></span>
+              </span>
+            </label>
           </section>
-
-          <div class="divider"></div>
 
           <section class="stack-sm">
             <div class="totals-row">
@@ -906,16 +993,49 @@ watch(
         </aside>
       </div>
 
-      <div v-if="isReceiptGenerated" ref="receiptExportFrame" class="receipt-export-frame">
-        <article ref="receiptPanel" class="receipt-panel" aria-labelledby="receipt-title">
+      <div v-if="isReceiptGenerated" class="receipt-variant-controls">
+        <div class="receipt-variant-switch" aria-label="Receipt style">
+          <button
+            class="receipt-variant-switch__option"
+            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'classic' }"
+            type="button"
+            :aria-pressed="receiptVariant === 'classic'"
+            @click="receiptVariant = 'classic'"
+          >
+            Classic
+          </button>
+          <button
+            class="receipt-variant-switch__option"
+            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'polished' }"
+            type="button"
+            :aria-pressed="receiptVariant === 'polished'"
+            @click="receiptVariant = 'polished'"
+          >
+            Polished
+          </button>
+        </div>
+        <p class="receipt-variant-disclaimer">Polished receipt version is in public beta.</p>
+      </div>
+
+      <div
+        v-if="isReceiptGenerated"
+        ref="receiptExportFrame"
+        class="receipt-export-frame"
+        :class="{ 'receipt-export-frame--polished': receiptVariant === 'polished' }"
+      >
+        <article
+          v-if="receiptVariant === 'classic'"
+          ref="receiptPanel"
+          class="receipt-panel"
+          aria-labelledby="receipt-title"
+        >
           <header class="receipt-panel__header stack-sm">
+            <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
             <h2 id="receipt-title" class="type-display-lg text-primary">
               {{ restaurantName || "L'Addition Receipt" }}
             </h2>
             <div class="receipt-panel__meta type-label text-muted">
               <span>{{ receiptDate }}</span>
-              <span aria-hidden="true"></span>
-              <span>{{ currency === 'custom' ? 'Custom' : currency }}</span>
             </div>
           </header>
 
@@ -962,6 +1082,11 @@ watch(
                     <span aria-hidden="true"></span>
                     <span>{{ formatCurrency(diner.fees) }}</span>
                   </li>
+                  <li v-if="isRoundingEnabled" class="receipt-line">
+                    <span>Rounding</span>
+                    <span aria-hidden="true"></span>
+                    <span>{{ formatSignedCurrency(diner.rounding) }}</span>
+                  </li>
                   <template v-if="isReceiptDinerExpanded(diner.id)">
                     <li
                       v-for="item in diner.items"
@@ -992,6 +1117,11 @@ watch(
                       <span aria-hidden="true"></span>
                       <span>-{{ formatCurrency(diner.discount) }}</span>
                     </li>
+                    <li v-if="isRoundingEnabled" class="receipt-line receipt-line--itemized">
+                      <span>Rounding</span>
+                      <span aria-hidden="true"></span>
+                      <span>{{ formatSignedCurrency(diner.rounding) }}</span>
+                    </li>
                   </template>
                 </ul>
 
@@ -1003,7 +1133,14 @@ watch(
             </div>
           </section>
 
-          <section class="receipt-summary" aria-label="Receipt total summary">
+          <section
+            class="receipt-summary"
+            :class="{ 'receipt-summary--with-qr': qrCodeImageUrl }"
+            aria-label="Receipt total summary"
+          >
+            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
+              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
+            </aside>
             <div class="receipt-summary__inner stack-sm">
               <div class="totals-row">
                 <span class="type-body-md text-muted">Subtotal</span>
@@ -1035,6 +1172,12 @@ watch(
                   >-{{ formatCurrency(receiptCalculation.discount) }}</span
                 >
               </div>
+              <div v-if="isRoundingEnabled" class="totals-row">
+                <span class="type-body-md text-muted">Rounding</span>
+                <span class="type-number-md text-primary">{{
+                  formatSignedCurrency(receiptCalculation.rounding)
+                }}</span>
+              </div>
               <div class="totals-row totals-row--total receipt-summary__total">
                 <span class="type-label text-primary">Grand Total</span>
                 <span class="manual-total-value text-primary">{{
@@ -1044,7 +1187,102 @@ watch(
             </div>
           </section>
 
-          <p class="receipt-signature">L'Addition</p>
+          <footer class="receipt-signature">
+            <span aria-hidden="true"></span>
+            <p>L'Addition</p>
+            <span aria-hidden="true"></span>
+          </footer>
+        </article>
+
+        <article
+          v-else
+          ref="receiptPanel"
+          class="receipt-polished"
+          aria-labelledby="polished-title"
+        >
+          <header class="receipt-polished__header">
+            <img class="receipt-polished__logo" src="/receipt-logo.png" alt="L'Addition" />
+            <h2 id="polished-title" class="receipt-polished__title">
+              {{ restaurantName || "L'Addition" }}
+            </h2>
+            <div class="receipt-polished__header-divider type-label text-muted">
+              <span aria-hidden="true"></span>
+              <span>{{ receiptDate }}</span>
+              <span aria-hidden="true"></span>
+            </div>
+          </header>
+
+          <section class="receipt-polished__guest-list" aria-label="Guest totals">
+            <div class="receipt-polished__guest receipt-polished__guest--header">
+              <span>Name</span>
+              <span>Details</span>
+              <span>Subtotal</span>
+            </div>
+            <article
+              v-for="(diner, index) in receiptCalculation.diners"
+              :key="diner.id"
+              class="receipt-polished__guest"
+            >
+              <h3>{{ diner.name || `Diner ${index + 1}` }}</h3>
+              <p>
+                {{ diner.subtotal.toFixed(2) }}
+                <span v-if="diner.fees !== 0" class="receipt-polished__detail-adjustment">
+                  <span>{{ getAmountSign(diner.fees) }}</span>
+                  <span>{{ formatAbsoluteAmount(diner.fees) }}</span>
+                </span>
+                <span v-if="isRoundingEnabled" class="receipt-polished__detail-adjustment">
+                  <span>{{ getAmountSign(diner.rounding) }}</span>
+                  <span>{{ formatAbsoluteAmount(diner.rounding) }}</span>
+                </span>
+              </p>
+              <strong>{{ formatCurrency(diner.total) }}</strong>
+            </article>
+          </section>
+
+          <section class="receipt-polished__summary" aria-label="Receipt summary">
+            <div>
+              <span>Subtotal</span>
+              <strong>{{ formatCurrency(receiptCalculation.subtotal) }}</strong>
+            </div>
+            <div>
+              <span>Service &amp; VAT</span>
+              <strong>{{
+                formatCurrency(receiptCalculation.service + receiptCalculation.tax)
+              }}</strong>
+            </div>
+            <div v-if="receiptCalculation.adjustments > 0">
+              <span>Adjustments</span>
+              <strong>{{ formatCurrency(receiptCalculation.adjustments) }}</strong>
+            </div>
+            <div v-if="receiptCalculation.discount > 0">
+              <span>Discount</span>
+              <strong>-{{ formatCurrency(receiptCalculation.discount) }}</strong>
+            </div>
+            <div v-if="isRoundingEnabled">
+              <span>Rounding</span>
+              <strong>{{ formatSignedCurrency(receiptCalculation.rounding) }}</strong>
+            </div>
+          </section>
+
+          <div
+            class="receipt-polished__settlement"
+            :class="{ 'receipt-polished__settlement--with-qr': qrCodeImageUrl }"
+          >
+            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
+              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
+            </aside>
+
+            <section class="receipt-polished__hero" aria-label="Grand total">
+              <span class="receipt-polished__hero-label">Grand Total</span>
+              <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
+            </section>
+          </div>
+
+          <footer class="receipt-polished__footer">
+            <span aria-hidden="true"></span>
+            <p>L'Addition</p>
+            <span aria-hidden="true"></span>
+          </footer>
         </article>
       </div>
 
@@ -1059,6 +1297,20 @@ watch(
       />
 
       <div v-if="isReceiptGenerated" class="receipt-actions">
+        <label class="button button--outline receipt-qr-upload">
+          Upload QR Code
+          <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
+          <input accept="image/*" type="file" @change="uploadQrCodeImage" />
+        </label>
+        <button
+          v-if="qrCodeImageUrl"
+          class="button button--ghost"
+          type="button"
+          @click="clearQrCodeImage"
+        >
+          Remove QR
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
         <button
           class="button button--outline"
           type="button"
