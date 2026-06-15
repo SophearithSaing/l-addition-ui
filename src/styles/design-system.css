@@ -2080,6 +2080,10 @@ layer(vendor);
     grid-column: 2;
   }
 
+  .receipt-summary--with-qr .receipt-qr {
+    width: calc(var(--space-2xl) * 4);
+  }
+
   @media (max-width: 767px) {
     .receipt-summary--with-qr {
       grid-template-columns: 1fr;
@@ -2094,7 +2098,7 @@ layer(vendor);
     .receipt-summary--with-qr .receipt-qr {
       grid-row: 2;
       margin-top: var(--space-md);
-      width: calc(var(--space-2xl) * 1.5);
+      width: calc(var(--space-2xl) * 3);
     }
   }
 
