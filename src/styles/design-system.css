@@ -2399,13 +2399,29 @@ layer(vendor);
   }
 
   @media (max-width: 767px) {
+    .receipt-polished__settlement {
+      min-width: 0;
+    }
+
     .receipt-polished__settlement--with-qr {
       flex-direction: column;
     }
 
+    .receipt-polished__settlement .receipt-polished__hero {
+      min-width: 0;
+      width: 100%;
+      padding: var(--space-sm);
+    }
+
+    .receipt-polished__settlement .receipt-polished__hero strong {
+      max-width: 100%;
+      font-size: var(--type-headline-lg-mobile-size);
+      line-height: var(--type-headline-lg-mobile-line);
+      overflow-wrap: anywhere;
+    }
+
     .receipt-polished__settlement--with-qr .receipt-polished__hero {
       order: 1;
-      width: 100%;
       text-align: center;
     }
 
