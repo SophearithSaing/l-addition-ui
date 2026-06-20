@@ -1063,12 +1063,6 @@ layer(vendor);
     padding-bottom: var(--space-sm);
   }
 
-  .recent-card-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-gutter);
-  }
-
   .manual-page {
     padding-block: var(--space-lg);
   }
@@ -2194,10 +2188,6 @@ layer(vendor);
 
     .manual-context-row {
       grid-template-columns: minmax(0, 1fr) max-content;
-    }
-
-    .recent-card-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .qr-crop-container {

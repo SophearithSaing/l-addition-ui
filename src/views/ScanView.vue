@@ -2,6 +2,7 @@
 import PageHero from '@/components/common/PageHero.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import RecentReceiptCard from '@/components/scan/RecentReceiptCard.vue'
+import RecentReceiptList from '@/components/scan/RecentReceiptList.vue'
 import UploadZone from '@/components/scan/UploadZone.vue'
 </script>
 
@@ -27,7 +28,7 @@ import UploadZone from '@/components/scan/UploadZone.vue'
         <h2 id="recent-title" class="recent-section__title type-headline-md text-primary">
           Recent Concierge Services
         </h2>
-        <div class="recent-card-grid">
+        <RecentReceiptList>
           <RecentReceiptCard icon="restaurant" title="Le Cinq" meta="Oct 24, 2023 • €420.00" />
           <RecentReceiptCard
             icon="local_cafe"
@@ -35,7 +36,7 @@ import UploadZone from '@/components/scan/UploadZone.vue'
             meta="Oct 22, 2023 • €45.50"
           />
           <RecentReceiptCard icon="wine_bar" title="Septime" meta="Oct 15, 2023 • €180.00" />
-        </div>
+        </RecentReceiptList>
       </section>
     </main>
   </PublicLayout>
