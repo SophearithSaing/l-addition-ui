@@ -3,6 +3,7 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
 import TotalRow from '@/components/common/TotalRow.vue'
@@ -735,20 +736,14 @@ watch(
             </div>
           </div>
 
-          <article v-if="diners.length === 0" class="manual-empty-state stack-md">
-            <span class="manual-empty-state__icon" aria-hidden="true">
-              <span class="material-symbols-outlined icon-lg">group_add</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-headline-md text-primary">No diners yet</h3>
-              <p class="type-body-md text-muted">
-                Add a diner to begin entering items and building the split.
-              </p>
-            </div>
-            <button class="button button--primary" type="button" @click="addDiner">
-              Add Diner
-            </button>
-          </article>
+          <EmptyState
+            v-if="diners.length === 0"
+            icon="group_add"
+            title="No diners yet"
+            message="Add a diner to begin entering items and building the split."
+            action-label="Add Diner"
+            @action="addDiner"
+          />
 
           <article v-for="diner in diners" :key="diner.id" class="manual-diner-card">
             <div class="split-row">

@@ -1410,40 +1410,18 @@ layer(vendor);
     color: color-mix(in srgb, var(--color-outline-variant) 50%, transparent);
   }
 
-  .manual-empty-state,
   .manual-diner-card {
     position: relative;
     display: flex;
     min-width: 0;
     flex-direction: column;
     overflow: hidden;
+    gap: var(--space-md);
     background: var(--color-surface);
     border: var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-sm);
     box-shadow: var(--shadow-ambient);
-  }
-
-  .manual-empty-state {
-    align-items: center;
-    justify-content: center;
-    border-style: dashed;
-    text-align: center;
-  }
-
-  .manual-empty-state__icon {
-    width: var(--space-2xl);
-    height: var(--space-2xl);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-pill);
-    background: var(--color-surface-container);
-    color: var(--color-on-surface-variant);
-  }
-
-  .manual-diner-card {
-    gap: var(--space-md);
     transition: border-color var(--motion-smooth);
   }
 
@@ -2430,7 +2408,6 @@ layer(vendor);
       padding-block: var(--space-section);
     }
 
-    .manual-empty-state,
     .manual-diner-card,
     .manual-summary {
       padding: var(--space-lg);
