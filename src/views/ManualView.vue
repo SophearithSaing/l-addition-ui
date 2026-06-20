@@ -6,7 +6,12 @@ import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import PageHero from '@/components/common/PageHero.vue'
+import SectionHeader from '@/components/common/SectionHeader.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
+import {
+  SectionHeaderLevel,
+  SectionHeaderType,
+} from '@/components/common/types/section-header'
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import PublicLayout from '@/components/public/PublicLayout.vue'
@@ -712,9 +717,8 @@ watch(
             </fieldset>
           </div>
 
-          <div class="split-row manual-section-title">
-            <h2 id="diners-title" class="type-headline-md text-primary">Diners</h2>
-            <div class="cluster">
+          <SectionHeader title-id="diners-title" title="Diners">
+            <template #actions>
               <button
                 class="button button--outline button--icon"
                 type="button"
@@ -732,8 +736,8 @@ watch(
               >
                 <span class="material-symbols-outlined" aria-hidden="true">add</span>
               </button>
-            </div>
-          </div>
+            </template>
+          </SectionHeader>
 
           <EmptyState
             v-if="diners.length === 0"
@@ -796,10 +800,15 @@ watch(
           </article>
 
           <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
-            <div class="split-row manual-section-title">
-              <h2 id="shared-items-title" class="type-headline-md text-primary">Shared Items</h2>
-              <InlineAction icon="add" text="Add Shared Item" @click="addSharedItem" />
-            </div>
+            <SectionHeader
+              title-id="shared-items-title"
+              title="Shared Items"
+              :type="SectionHeaderType.Baseline"
+            >
+              <template #actions>
+                <InlineAction icon="add" text="Add Shared Item" @click="addSharedItem" />
+              </template>
+            </SectionHeader>
 
             <p v-if="sharedItems.length === 0" class="type-body-md text-muted">
               Add items that should be split across multiple diners.
@@ -1046,15 +1055,19 @@ watch(
           </header>
 
           <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
-            <div class="receipt-section__header">
-              <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
-                Guest Breakdown
-              </h3>
-              <InlineAction
-                :text="areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All'"
-                @click="toggleAllReceiptDiners"
-              />
-            </div>
+            <SectionHeader
+              title-id="receipt-breakdown-title"
+              title="Guest Breakdown"
+              :level="SectionHeaderLevel.Three"
+              :type="SectionHeaderType.Receipt"
+            >
+              <template #actions>
+                <InlineAction
+                  :text="areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All'"
+                  @click="toggleAllReceiptDiners"
+                />
+              </template>
+            </SectionHeader>
 
             <div class="receipt-diner-grid">
               <section

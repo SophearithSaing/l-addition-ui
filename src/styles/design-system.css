@@ -1208,8 +1208,7 @@ layer(vendor);
     white-space: nowrap;
   }
 
-  .recent-section__title,
-  .manual-section-title {
+  .recent-section__title {
     border-bottom: var(--border-subtle);
     padding-bottom: var(--space-sm);
   }
@@ -1402,10 +1401,6 @@ layer(vendor);
 
   .manual-shared-section {
     margin-top: var(--space-md);
-  }
-
-  .manual-shared-section .manual-section-title {
-    align-items: baseline;
   }
 
   .shared-participant-label {
@@ -1830,16 +1825,6 @@ layer(vendor);
 
   .receipt-section {
     margin-bottom: var(--space-2xl);
-  }
-
-  .receipt-section__header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
-    padding-bottom: var(--space-sm);
   }
 
   .receipt-diner-grid {
