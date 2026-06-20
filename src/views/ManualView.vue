@@ -6,6 +6,7 @@ import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
+import ManualItemRow from '@/components/manual/ManualItemRow.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
@@ -16,6 +17,7 @@ import {
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
+import { ManualItemRowType } from '@/components/manual/types/manual-item-row'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -736,27 +738,17 @@ watch(
                 No items assigned to this diner yet.
               </p>
 
-              <div v-for="item in diner.items" :key="item.id" class="manual-item-row">
-                <input v-model="item.name" class="manual-item-row__name" placeholder="Item name" />
-                <span class="manual-item-row__price">
-                  <span class="text-muted">{{ currencySymbol }}</span>
-                  <input
-                    v-model="item.amount"
-                    inputmode="decimal"
-                    min="0"
-                    placeholder="0.00"
-                    step="0.01"
-                    type="number"
-                    @keydown="blockInvalidNumberKey"
-                  />
-                </span>
-                <InlineAction
-                  icon="close"
-                  aria-label="Remove item"
-                  :type="InlineActionType.Icon"
-                  @click="removeItem(diner, item.id)"
-                />
-              </div>
+              <ManualItemRow
+                v-for="item in diner.items"
+                :key="item.id"
+                v-model:name="item.name"
+                v-model:amount="item.amount"
+                :currency-symbol="currencySymbol"
+                name-placeholder="Item name"
+                remove-label="Remove item"
+                @amount-keydown="blockInvalidNumberKey"
+                @remove="removeItem(diner, item.id)"
+              />
 
               <InlineAction icon="add" text="Add Item" @click="addItem(diner)" />
             </div>
@@ -778,31 +770,16 @@ watch(
             </p>
 
             <article v-for="item in sharedItems" :key="item.id" class="manual-diner-card">
-              <div class="manual-item-row manual-item-row--active">
-                <input
-                  v-model="item.name"
-                  class="manual-item-row__name type-headline-md"
-                  placeholder="Shared item name"
-                />
-                <span class="manual-item-row__price">
-                  <span class="text-muted">{{ currencySymbol }}</span>
-                  <input
-                    v-model="item.amount"
-                    inputmode="decimal"
-                    min="0"
-                    placeholder="0.00"
-                    step="0.01"
-                    type="number"
-                    @keydown="blockInvalidNumberKey"
-                  />
-                </span>
-                <InlineAction
-                  icon="close"
-                  aria-label="Remove shared item"
-                  :type="InlineActionType.Icon"
-                  @click="removeSharedItem(item.id)"
-                />
-              </div>
+              <ManualItemRow
+                v-model:name="item.name"
+                v-model:amount="item.amount"
+                :currency-symbol="currencySymbol"
+                name-placeholder="Shared item name"
+                remove-label="Remove shared item"
+                :type="ManualItemRowType.Active"
+                @amount-keydown="blockInvalidNumberKey"
+                @remove="removeSharedItem(item.id)"
+              />
 
               <div class="stack-xs">
                 <p class="shared-participant-label type-label text-muted">Participating Diners</p>

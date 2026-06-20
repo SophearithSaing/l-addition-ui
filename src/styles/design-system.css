@@ -1155,30 +1155,16 @@ layer(vendor);
     opacity: 1;
   }
 
-  .manual-item-row,
   .summary-input-row {
     min-width: 0;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-xs);
     border-bottom: var(--border-subtle);
     padding-block: var(--space-xs);
   }
 
-  .manual-item-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content max-content;
-  }
-
-  .summary-input-row {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .manual-item-row--active {
-    border-bottom-color: var(--color-primary);
-  }
-
-  .manual-item-row input,
   .summary-input-row input {
     min-width: 0;
     border: 0;
@@ -1187,19 +1173,10 @@ layer(vendor);
     font-family: var(--font-body);
   }
 
-  .manual-item-row input:focus,
   .summary-input-row input:focus {
     outline: none;
   }
 
-  .manual-item-row__name {
-    min-width: 0;
-    flex: 1;
-    font-size: var(--type-body-md-size);
-    line-height: var(--type-body-md-line);
-  }
-
-  .manual-item-row__price,
   .summary-input-row span:last-child,
   .discount-control {
     display: inline-flex;
@@ -1208,7 +1185,6 @@ layer(vendor);
     color: var(--color-on-surface-variant);
   }
 
-  .manual-item-row__price input,
   .summary-input-row input {
     width: 3.75rem;
     font-size: var(--type-number-md-size);
@@ -2077,12 +2053,10 @@ layer(vendor);
       padding: var(--space-lg);
     }
 
-    .manual-item-row,
     .summary-input-row {
       gap: var(--space-sm);
     }
 
-    .manual-item-row__price input,
     .summary-input-row input {
       width: 5rem;
     }
