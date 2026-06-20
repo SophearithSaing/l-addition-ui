@@ -5,6 +5,7 @@ import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
+import DinerCard from '@/components/manual/DinerCard.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualItemRow from '@/components/manual/ManualItemRow.vue'
 import PageHero from '@/components/common/PageHero.vue'
@@ -713,46 +714,16 @@ watch(
             @action="addDiner"
           />
 
-          <article v-for="diner in diners" :key="diner.id" class="manual-diner-card">
-            <div class="split-row">
-              <label class="quiet-field manual-diner-card__name">
-                <span class="field__label">Diner Name</span>
-                <input
-                  v-model="diner.name"
-                  class="input input--stationery type-headline-md"
-                  placeholder="Enter name..."
-                />
-              </label>
-              <button
-                class="button button--ghost button--icon"
-                type="button"
-                aria-label="Remove diner"
-                @click="removeDiner(diner.id)"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">close</span>
-              </button>
-            </div>
-
-            <div class="stack-sm">
-              <p v-if="diner.items.length === 0" class="type-body-md text-muted">
-                No items assigned to this diner yet.
-              </p>
-
-              <ManualItemRow
-                v-for="item in diner.items"
-                :key="item.id"
-                v-model:name="item.name"
-                v-model:amount="item.amount"
-                :currency-symbol="currencySymbol"
-                name-placeholder="Item name"
-                remove-label="Remove item"
-                @amount-keydown="blockInvalidNumberKey"
-                @remove="removeItem(diner, item.id)"
-              />
-
-              <InlineAction icon="add" text="Add Item" @click="addItem(diner)" />
-            </div>
-          </article>
+          <DinerCard
+            v-for="diner in diners"
+            :key="diner.id"
+            :diner="diner"
+            :currency-symbol="currencySymbol"
+            @amount-keydown="blockInvalidNumberKey"
+            @add-item="addItem(diner)"
+            @remove-item="removeItem(diner, $event)"
+            @remove-diner="removeDiner(diner.id)"
+          />
 
           <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
             <SectionHeader

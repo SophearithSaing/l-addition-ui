@@ -1103,16 +1103,6 @@ layer(vendor);
     transition: border-color var(--motion-smooth);
   }
 
-  .manual-diner-card__name {
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .manual-diner-card > .split-row {
-    flex-wrap: nowrap;
-    align-items: flex-end;
-  }
-
   .manual-diner-card:hover {
     border-color: var(--color-outline);
   }
