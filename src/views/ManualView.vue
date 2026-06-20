@@ -3,9 +3,8 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
-import DinerCard from '@/components/manual/DinerCard.vue'
+import DinerSection from '@/components/manual/DinerSection.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualItemRow from '@/components/manual/ManualItemRow.vue'
 import PageHero from '@/components/common/PageHero.vue'
@@ -683,46 +682,15 @@ watch(
             v-model:custom-currency="customCurrency"
           />
 
-          <SectionHeader title-id="diners-title" title="Diners">
-            <template #actions>
-              <button
-                class="button button--outline button--icon"
-                type="button"
-                aria-label="Remove last diner"
-                :disabled="diners.length === 0"
-                @click="removeLastDiner"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">remove</span>
-              </button>
-              <button
-                class="button button--primary button--icon"
-                type="button"
-                aria-label="Add diner"
-                @click="addDiner"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              </button>
-            </template>
-          </SectionHeader>
-
-          <EmptyState
-            v-if="diners.length === 0"
-            icon="group_add"
-            title="No diners yet"
-            message="Add a diner to begin entering items and building the split."
-            action-label="Add Diner"
-            @action="addDiner"
-          />
-
-          <DinerCard
-            v-for="diner in diners"
-            :key="diner.id"
-            :diner="diner"
+          <DinerSection
+            :diners="diners"
             :currency-symbol="currencySymbol"
+            @add-diner="addDiner"
+            @remove-last-diner="removeLastDiner"
+            @remove-diner="removeDiner"
+            @add-item="addItem"
+            @remove-item="removeItem"
             @amount-keydown="blockInvalidNumberKey"
-            @add-item="addItem(diner)"
-            @remove-item="removeItem(diner, $event)"
-            @remove-diner="removeDiner(diner.id)"
           />
 
           <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
