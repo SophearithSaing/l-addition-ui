@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import CurrencySelector from '@/components/manual/CurrencySelector.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
@@ -14,6 +15,7 @@ import {
 } from '@/components/common/types/section-header'
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
+import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -44,7 +46,7 @@ interface ManualAdjustment {
 
 interface ManualDraftState {
   restaurantName: string
-  currency: string
+  currency: CurrencyCode
   customCurrency: string
   serviceCharge: string
   taxRate: string
@@ -58,7 +60,7 @@ interface ManualDraftState {
 
 const manualDraftStorageKey = 'l-addition.manual-draft'
 const restaurantName = ref('')
-const currency = ref('THB')
+const currency = ref<CurrencyCode>(CurrencyCode.Thb)
 const customCurrency = ref('')
 const serviceCharge = ref('')
 const taxRate = ref('')
@@ -130,7 +132,7 @@ const hasBillData = computed(() => {
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
     isRoundingEnabled.value !== true ||
-    currency.value !== 'THB' ||
+    currency.value !== CurrencyCode.Thb ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
     adjustments.value.length > 0 ||
@@ -161,11 +163,11 @@ const areAllReceiptDinersExpanded = computed(() => {
   )
 })
 const currencySymbol = computed(() => {
-  if (currency.value === 'THB') {
+  if (currency.value === CurrencyCode.Thb) {
     return '฿'
   }
 
-  if (currency.value === 'custom') {
+  if (currency.value === CurrencyCode.Custom) {
     return customCurrency.value.trim() || '$'
   }
 
@@ -264,7 +266,7 @@ function getManualDraftState(): ManualDraftState {
  */
 function restoreManualDraftState(draft: ManualDraftState): void {
   adjustments.value = draft.adjustments ?? []
-  currency.value = draft.currency || 'THB'
+  currency.value = draft.currency || CurrencyCode.Thb
   customCurrency.value = draft.customCurrency ?? ''
   diners.value = draft.diners ?? []
   discount.value = draft.discount ?? ''
@@ -336,7 +338,7 @@ function closeClearDialog(): void {
 function confirmClearBill(): void {
   shouldSkipNextDraftSave.value = true
   restaurantName.value = ''
-  currency.value = 'THB'
+  currency.value = CurrencyCode.Thb
   customCurrency.value = ''
   serviceCharge.value = ''
   taxRate.value = ''
@@ -682,39 +684,11 @@ watch(
               />
             </label>
 
-            <fieldset class="currency-field">
-              <legend class="manual-context-label">Currency</legend>
-              <div class="currency-field__controls">
-                <button
-                  class="currency-choice"
-                  :class="{ 'currency-choice--active': currency === 'USD' }"
-                  type="button"
-                  @click="currency = 'USD'"
-                >
-                  USD ($)
-                </button>
-                <button
-                  class="currency-choice"
-                  :class="{ 'currency-choice--active': currency === 'THB' }"
-                  type="button"
-                  @click="currency = 'THB'"
-                >
-                  THB (฿)
-                </button>
-                <label
-                  class="currency-custom"
-                  :class="{ 'currency-custom--active': currency === 'custom' }"
-                >
-                  <input
-                    v-model="customCurrency"
-                    class="currency-custom__input"
-                    placeholder="Custom"
-                    maxlength="4"
-                    @focus="currency = 'custom'"
-                  />
-                </label>
-              </div>
-            </fieldset>
+            <CurrencySelector
+              v-model:currency="currency"
+              v-model:custom-currency="customCurrency"
+              label="Currency"
+            />
           </div>
 
           <SectionHeader title-id="diners-title" title="Diners">
