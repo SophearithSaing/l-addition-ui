@@ -3,3 +3,9 @@ export enum TotalRowType {
   Total = 'total',
   GrandTotal = 'grand-total',
 }
+
+export interface TotalRowProps {
+  label: string
+  type?: TotalRowType
+  value: string
+}

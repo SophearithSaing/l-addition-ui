@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TotalRow from '@/components/common/TotalRow.vue'
-import { TotalRowType } from '@/components/common/total-row'
+import { TotalRowType } from '@/components/common/types/total-row'
 </script>
 
 <template>
