@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PageHero from '@/components/common/PageHero.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import UploadZone from '@/components/scan/UploadZone.vue'
 </script>
 
 <template>
@@ -12,21 +13,14 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
         description="Drop your receipt here or select a file to begin the art of the split."
       />
 
-      <label class="upload-zone" for="file-upload">
-        <span class="upload-zone__glow" aria-hidden="true"></span>
-        <span class="material-symbols-outlined upload-zone__icon" aria-hidden="true">
-          receipt_long
-        </span>
-        <span class="type-label text-primary">Upload Receipt</span>
-        <span class="type-body-md text-muted">JPG, PNG or PDF (Max 10MB)</span>
-        <span class="upload-zone__action type-label">Browse Files</span>
-        <input
-          id="file-upload"
-          class="visually-hidden"
-          accept="image/jpeg, image/png, application/pdf"
-          type="file"
-        />
-      </label>
+      <UploadZone
+        input-id="file-upload"
+        icon="receipt_long"
+        title="Upload Receipt"
+        helper-text="JPG, PNG or PDF (Max 10MB)"
+        action-label="Browse Files"
+        accept="image/jpeg, image/png, application/pdf"
+      />
 
       <section class="recent-section stack-md" aria-labelledby="recent-title">
         <h2 id="recent-title" class="recent-section__title type-headline-md text-primary">
