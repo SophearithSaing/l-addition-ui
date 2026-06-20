@@ -4,8 +4,8 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import CurrencySelector from '@/components/manual/CurrencySelector.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
+import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
@@ -674,22 +674,11 @@ watch(
 
       <div class="manual-layout">
         <section class="manual-diners stack-lg" aria-labelledby="diners-title">
-          <div class="manual-context-row">
-            <label class="quiet-field manual-context-row__restaurant">
-              <span class="manual-context-label">Restaurant Name</span>
-              <input
-                v-model="restaurantName"
-                class="input input--stationery type-headline-md"
-                placeholder="e.g. Le Meurice"
-              />
-            </label>
-
-            <CurrencySelector
-              v-model:currency="currency"
-              v-model:custom-currency="customCurrency"
-              label="Currency"
-            />
-          </div>
+          <ManualContextForm
+            v-model:restaurant-name="restaurantName"
+            v-model:currency="currency"
+            v-model:custom-currency="customCurrency"
+          />
 
           <SectionHeader title-id="diners-title" title="Diners">
             <template #actions>
