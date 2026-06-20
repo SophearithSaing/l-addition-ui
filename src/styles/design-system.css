@@ -1469,10 +1469,6 @@ layer(vendor);
     align-items: baseline;
   }
 
-  .manual-shared-section .inline-text-action {
-    align-self: baseline;
-  }
-
   .shared-participant-label {
     font-size: 10px;
     line-height: 14px;
@@ -1604,56 +1600,6 @@ layer(vendor);
 
   .discount-control__unit--remove:hover {
     color: var(--color-error);
-  }
-
-  .inline-text-action,
-  .inline-icon-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    transition:
-      color var(--motion-smooth),
-      background var(--motion-smooth);
-  }
-
-  .inline-text-action {
-    width: max-content;
-    gap: var(--space-xs);
-    color: var(--color-secondary);
-    font-size: 12px;
-    line-height: var(--type-label-sm-line);
-  }
-
-  .inline-text-action--muted {
-    color: var(--color-on-surface-variant);
-    font-size: 10px;
-    line-height: var(--type-label-sm-line);
-    letter-spacing: var(--type-label-md-tracking);
-  }
-
-  .inline-text-action--muted:hover {
-    color: var(--color-primary);
-  }
-
-  .inline-icon-action {
-    width: var(--space-lg);
-    height: var(--space-lg);
-    flex: 0 0 auto;
-    border-radius: var(--radius-pill);
-    color: var(--color-outline);
-  }
-
-  .inline-icon-action:hover {
-    background: var(--color-error-container);
-    color: var(--color-error);
-  }
-
-  .inline-text-action .material-symbols-outlined,
-  .inline-icon-action .material-symbols-outlined {
-    font-size: var(--type-body-md-size);
   }
 
   .manual-summary {

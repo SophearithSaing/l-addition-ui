@@ -3,8 +3,10 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
+import InlineAction from '@/components/common/InlineAction.vue'
+import { InlineActionType } from '@/components/common/types/inline-action'
 import TotalRow from '@/components/common/TotalRow.vue'
-import { TotalRowType } from '@/components/common/total-row'
+import { TotalRowType } from '@/components/common/types/total-row'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -787,30 +789,22 @@ watch(
                     @keydown="blockInvalidNumberKey"
                   />
                 </span>
-                <button
-                  class="inline-icon-action"
-                  type="button"
+                <InlineAction
+                  icon="close"
                   aria-label="Remove item"
+                  :type="InlineActionType.Icon"
                   @click="removeItem(diner, item.id)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>
+                />
               </div>
 
-              <button class="inline-text-action type-label" type="button" @click="addItem(diner)">
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-                Add Item
-              </button>
+              <InlineAction icon="add" text="Add Item" @click="addItem(diner)" />
             </div>
           </article>
 
           <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
             <div class="split-row manual-section-title">
               <h2 id="shared-items-title" class="type-headline-md text-primary">Shared Items</h2>
-              <button class="inline-text-action type-label" type="button" @click="addSharedItem">
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-                Add Shared Item
-              </button>
+              <InlineAction icon="add" text="Add Shared Item" @click="addSharedItem" />
             </div>
 
             <p v-if="sharedItems.length === 0" class="type-body-md text-muted">
@@ -836,14 +830,12 @@ watch(
                     @keydown="blockInvalidNumberKey"
                   />
                 </span>
-                <button
-                  class="inline-icon-action"
-                  type="button"
+                <InlineAction
+                  icon="close"
                   aria-label="Remove shared item"
+                  :type="InlineActionType.Icon"
                   @click="removeSharedItem(item.id)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>
+                />
               </div>
 
               <div class="stack-xs">
@@ -964,14 +956,12 @@ watch(
                 </button>
               </span>
             </div>
-            <button
-              class="inline-text-action inline-text-action--muted type-label"
-              type="button"
+            <InlineAction
+              icon="add"
+              text="Add Adjustment"
+              :type="InlineActionType.Muted"
               @click="addAdjustment"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              Add Adjustment
-            </button>
+            />
             <label class="summary-toggle-row summary-toggle-row--switch">
               <span>Round Totals</span>
               <span class="summary-switch-control">
@@ -1066,13 +1056,10 @@ watch(
               <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
                 Guest Breakdown
               </h3>
-              <button
-                class="inline-text-action type-label"
-                type="button"
+              <InlineAction
+                :text="areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All'"
                 @click="toggleAllReceiptDiners"
-              >
-                {{ areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All' }}
-              </button>
+              />
             </div>
 
             <div class="receipt-diner-grid">
