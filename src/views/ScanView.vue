@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PageHero from '@/components/common/PageHero.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import RecentReceiptCard from '@/components/scan/RecentReceiptCard.vue'
 import UploadZone from '@/components/scan/UploadZone.vue'
 </script>
 
@@ -27,33 +28,13 @@ import UploadZone from '@/components/scan/UploadZone.vue'
           Recent Concierge Services
         </h2>
         <div class="recent-card-grid">
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">restaurant</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Le Cinq</h3>
-              <p class="type-label text-muted">Oct 24, 2023 • €420.00</p>
-            </div>
-          </article>
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">local_cafe</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Café de Flore</h3>
-              <p class="type-label text-muted">Oct 22, 2023 • €45.50</p>
-            </div>
-          </article>
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">wine_bar</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Septime</h3>
-              <p class="type-label text-muted">Oct 15, 2023 • €180.00</p>
-            </div>
-          </article>
+          <RecentReceiptCard icon="restaurant" title="Le Cinq" meta="Oct 24, 2023 • €420.00" />
+          <RecentReceiptCard
+            icon="local_cafe"
+            title="Café de Flore"
+            meta="Oct 22, 2023 • €45.50"
+          />
+          <RecentReceiptCard icon="wine_bar" title="Septime" meta="Oct 15, 2023 • €180.00" />
         </div>
       </section>
     </main>

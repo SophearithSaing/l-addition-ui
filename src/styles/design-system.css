@@ -1069,33 +1069,6 @@ layer(vendor);
     gap: var(--space-gutter);
   }
 
-  .recent-card {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    background: var(--color-surface-container-low);
-    border: var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-sm);
-    transition: border-color var(--motion-smooth);
-  }
-
-  .recent-card:hover {
-    border-color: var(--color-outline);
-  }
-
-  .recent-card__icon {
-    width: var(--space-2xl);
-    height: var(--space-2xl);
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    background: var(--color-surface-container-high);
-    color: var(--color-outline);
-  }
-
   .manual-page {
     padding-block: var(--space-lg);
   }
