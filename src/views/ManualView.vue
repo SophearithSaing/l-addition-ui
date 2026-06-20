@@ -5,6 +5,7 @@ import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
+import PageHero from '@/components/common/PageHero.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
@@ -662,9 +663,7 @@ watch(
 <template>
   <PublicLayout>
     <main class="manual-page app-container">
-      <section class="manual-hero stack-sm" aria-labelledby="manual-title">
-        <h1 id="manual-title" class="type-display-lg text-primary">The Art of the Split</h1>
-      </section>
+      <PageHero title-id="manual-title" title="The Art of the Split" />
 
       <div class="manual-layout">
         <section class="manual-diners stack-lg" aria-labelledby="diners-title">

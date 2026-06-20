@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import PageHero from '@/components/common/PageHero.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 </script>
 
 <template>
   <PublicLayout>
     <main class="scan-page app-container">
-      <section class="scan-hero stack-sm" aria-labelledby="scan-title">
-        <h1 id="scan-title" class="type-display-lg text-primary">The Digital Concierge awaits.</h1>
-        <p class="type-body-lg text-muted">
-          Drop your receipt here or select a file to begin the art of the split.
-        </p>
-      </section>
+      <PageHero
+        title-id="scan-title"
+        title="The Digital Concierge awaits."
+        description="Drop your receipt here or select a file to begin the art of the split."
+      />
 
       <label class="upload-zone" for="file-upload">
         <span class="upload-zone__glow" aria-hidden="true"></span>

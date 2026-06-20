@@ -1,21 +1,19 @@
 <script setup lang="ts">
+import PageHero from '@/components/common/PageHero.vue'
+import { PageHeroType } from '@/components/common/types/page-hero'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 </script>
 
 <template>
   <PublicLayout>
     <main class="home-select app-container">
-      <section class="home-select__hero stack-sm" aria-labelledby="home-title">
-        <div class="eyebrow-divider type-label text-muted">
-          <span aria-hidden="true"></span>
-          Choose How to Start
-          <span aria-hidden="true"></span>
-        </div>
-        <h1 id="home-title" class="type-display-lg text-primary">The Art of the Split</h1>
-        <p class="type-body-md text-muted">
-          Upload your bill or enter items manually to begin a seamless division of the expenses.
-        </p>
-      </section>
+      <PageHero
+        title-id="home-title"
+        title="The Art of the Split"
+        eyebrow="Choose How to Start"
+        description="Upload your bill or enter items manually to begin a seamless division of the expenses."
+        :type="PageHeroType.Home"
+      />
 
       <section class="home-choice-grid" aria-label="Bill entry options">
         <!-- <RouterLink

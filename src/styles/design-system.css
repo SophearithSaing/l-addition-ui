@@ -1053,29 +1053,6 @@ layer(vendor);
     padding-block: var(--space-section);
   }
 
-  .home-select__hero {
-    max-width: var(--container-reading);
-    align-items: center;
-    text-align: center;
-  }
-
-  .home-select__hero p {
-    max-width: 28rem;
-  }
-
-  .eyebrow-divider {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-  }
-
-  .eyebrow-divider span {
-    width: var(--space-lg);
-    height: 1px;
-    background: var(--color-outline-variant);
-  }
-
   .home-choice-grid {
     width: min(100%, 56rem);
     display: flex;
@@ -1178,16 +1155,6 @@ layer(vendor);
     padding-block: var(--space-section);
   }
 
-  .scan-hero {
-    align-items: center;
-    margin-bottom: var(--space-xl);
-    text-align: center;
-  }
-
-  .scan-hero p {
-    max-width: var(--container-reading);
-  }
-
   .upload-zone {
     position: relative;
     min-height: 320px;
@@ -1282,12 +1249,6 @@ layer(vendor);
 
   .manual-page {
     padding-block: var(--space-lg);
-  }
-
-  .manual-hero {
-    align-items: center;
-    margin-bottom: var(--space-xl);
-    text-align: center;
   }
 
   .history-chip {
