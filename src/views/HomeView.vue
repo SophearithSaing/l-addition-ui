@@ -2,6 +2,7 @@
 import PageHero from '@/components/common/PageHero.vue'
 import { PageHeroType } from '@/components/common/types/page-hero'
 import HomeChoiceCard from '@/components/home/HomeChoiceCard.vue'
+import HomeStartOptions from '@/components/home/HomeStartOptions.vue'
 import { HomeChoiceCardType } from '@/components/home/types/home-choice-card'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 </script>
@@ -17,24 +18,27 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
         :type="PageHeroType.Home"
       />
 
-      <section class="home-choice-grid" aria-label="Bill entry options">
-        <HomeChoiceCard
-          icon="receipt_long"
-          title="Upload Receipt"
-          description="We'll automatically itemize the bill so you can review and assign them."
-          to="/scan"
-          :type="HomeChoiceCardType.Scan"
-          disabled
-        />
-        <div class="home-choice-divider type-label text-muted" aria-hidden="true">or</div>
+      <HomeStartOptions>
+        <template #scan>
+          <HomeChoiceCard
+            icon="receipt_long"
+            title="Upload Receipt"
+            description="We'll automatically itemize the bill so you can review and assign them."
+            to="/scan"
+            :type="HomeChoiceCardType.Scan"
+            disabled
+          />
+        </template>
 
-        <HomeChoiceCard
-          icon="edit_square"
-          title="Start Manual Entry"
-          description="Input items and assign them to diners yourself."
-          to="/manual"
-        />
-      </section>
+        <template #manual>
+          <HomeChoiceCard
+            icon="edit_square"
+            title="Start Manual Entry"
+            description="Input items and assign them to diners yourself."
+            to="/manual"
+          />
+        </template>
+      </HomeStartOptions>
     </main>
   </PublicLayout>
 </template>

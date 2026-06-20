@@ -1053,13 +1053,6 @@ layer(vendor);
     padding-block: var(--space-section);
   }
 
-  .home-choice-grid {
-    width: min(100%, 56rem);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-gutter);
-  }
-
   .upload-zone__glow {
     position: absolute;
     inset: 0;
@@ -1071,13 +1064,6 @@ layer(vendor);
 
   .upload-zone:hover .upload-zone__glow {
     opacity: 0.1;
-  }
-
-  .home-choice-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-style: italic;
   }
 
   .scan-page {
@@ -2301,15 +2287,6 @@ layer(vendor);
 
     .manual-context-row {
       grid-template-columns: minmax(0, 1fr) max-content;
-    }
-
-    .home-choice-grid {
-      flex-direction: row;
-      align-items: stretch;
-    }
-
-    .home-choice-divider {
-      padding-inline: var(--space-xs);
     }
 
     .recent-card-grid {
