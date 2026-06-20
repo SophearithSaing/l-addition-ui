@@ -1765,15 +1765,6 @@ layer(vendor);
     outline: none;
   }
 
-  .manual-total-value {
-    font-family: var(--font-body);
-    font-size: var(--type-headline-lg-mobile-size);
-    font-weight: var(--type-number-xl-weight);
-    font-variant-numeric: tabular-nums lining-nums;
-    line-height: var(--type-headline-lg-mobile-line);
-    letter-spacing: var(--type-number-xl-tracking);
-  }
-
   .manual-summary__actions {
     display: flex;
     flex-direction: column;
@@ -2119,12 +2110,6 @@ layer(vendor);
 
   .receipt-summary__inner {
     width: min(100%, 420px);
-  }
-
-  .receipt-summary__total {
-    border-top: var(--border-strong);
-    margin-top: var(--space-sm);
-    padding-top: var(--space-md);
   }
 
   .receipt-signature {
@@ -2515,11 +2500,6 @@ layer(vendor);
       width: 5rem;
     }
 
-    .manual-total-value {
-      font-size: var(--type-display-lg-size);
-      line-height: var(--type-display-lg-line);
-    }
-
     .manual-context-row {
       grid-template-columns: minmax(0, 1fr) max-content;
     }
@@ -2726,8 +2706,7 @@ layer(vendor);
     gap: var(--space-sm);
   }
 
-  .diner-card__item,
-  .totals-row {
+  .diner-card__item {
     display: flex;
     gap: var(--space-md);
     align-items: center;
@@ -2738,15 +2717,6 @@ layer(vendor);
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-  }
-
-  .totals-row--total {
-    padding-top: var(--space-sm);
-  }
-
-  .totals-row__total-value {
-    font-size: var(--type-headline-md-size);
-    line-height: var(--type-headline-md-line);
   }
 
   .badge {

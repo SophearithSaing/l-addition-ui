@@ -3,6 +3,8 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
+import TotalRow from '@/components/common/TotalRow.vue'
+import { TotalRowType } from '@/components/common/total-row'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -981,24 +983,14 @@ watch(
           </section>
 
           <section class="stack-sm">
-            <div class="totals-row">
-              <span class="type-body-md text-muted">Subtotal</span>
-              <span class="type-number-md text-primary">{{ formatCurrency(subtotal) }}</span>
-            </div>
-            <div class="totals-row">
-              <span class="type-body-md text-muted">VAT &amp; Fees</span>
-              <span class="type-number-md text-primary">{{ formatCurrency(taxAndFees) }}</span>
-            </div>
-            <div v-if="additionalAdjustmentsTotal > 0" class="totals-row">
-              <span class="type-body-md text-muted">Adjustments</span>
-              <span class="type-number-md text-primary">
-                {{ formatCurrency(additionalAdjustmentsTotal) }}
-              </span>
-            </div>
-            <div class="totals-row totals-row--total">
-              <span class="type-headline-md text-primary">Total</span>
-              <span class="manual-total-value text-primary">{{ formatCurrency(total) }}</span>
-            </div>
+            <TotalRow label="Subtotal" :value="formatCurrency(subtotal)" />
+            <TotalRow label="VAT &amp; Fees" :value="formatCurrency(taxAndFees)" />
+            <TotalRow
+              v-if="additionalAdjustmentsTotal > 0"
+              label="Adjustments"
+              :value="formatCurrency(additionalAdjustmentsTotal)"
+            />
+            <TotalRow label="Total" :value="formatCurrency(total)" :type="TotalRowType.Total" />
           </section>
 
           <div class="manual-summary__actions">
@@ -1172,48 +1164,29 @@ watch(
               <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
             </aside>
             <div class="receipt-summary__inner stack-sm">
-              <div class="totals-row">
-                <span class="type-body-md text-muted">Subtotal</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.subtotal)
-                }}</span>
-              </div>
-              <div class="totals-row">
-                <span class="type-body-md text-muted">Service</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.service)
-                }}</span>
-              </div>
-              <div class="totals-row">
-                <span class="type-body-md text-muted">VAT</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.tax)
-                }}</span>
-              </div>
-              <div v-if="receiptCalculation.adjustments > 0" class="totals-row">
-                <span class="type-body-md text-muted">Adjustments</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.adjustments)
-                }}</span>
-              </div>
-              <div v-if="receiptCalculation.discount > 0" class="totals-row">
-                <span class="type-body-md text-muted">Discount</span>
-                <span class="type-number-md text-primary"
-                  >-{{ formatCurrency(receiptCalculation.discount) }}</span
-                >
-              </div>
-              <div v-if="isRoundingEnabled" class="totals-row">
-                <span class="type-body-md text-muted">Rounding</span>
-                <span class="type-number-md text-primary">{{
-                  formatSignedCurrency(receiptCalculation.rounding)
-                }}</span>
-              </div>
-              <div class="totals-row totals-row--total receipt-summary__total">
-                <span class="type-label text-primary">Grand Total</span>
-                <span class="manual-total-value text-primary">{{
-                  formatCurrency(receiptCalculation.total)
-                }}</span>
-              </div>
+              <TotalRow label="Subtotal" :value="formatCurrency(receiptCalculation.subtotal)" />
+              <TotalRow label="Service" :value="formatCurrency(receiptCalculation.service)" />
+              <TotalRow label="VAT" :value="formatCurrency(receiptCalculation.tax)" />
+              <TotalRow
+                v-if="receiptCalculation.adjustments > 0"
+                label="Adjustments"
+                :value="formatCurrency(receiptCalculation.adjustments)"
+              />
+              <TotalRow
+                v-if="receiptCalculation.discount > 0"
+                label="Discount"
+                :value="`-${formatCurrency(receiptCalculation.discount)}`"
+              />
+              <TotalRow
+                v-if="isRoundingEnabled"
+                label="Rounding"
+                :value="formatSignedCurrency(receiptCalculation.rounding)"
+              />
+              <TotalRow
+                label="Grand Total"
+                :value="formatCurrency(receiptCalculation.total)"
+                :type="TotalRowType.GrandTotal"
+              />
             </div>
           </section>
 

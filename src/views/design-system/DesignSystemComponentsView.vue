@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import TotalRow from '@/components/common/TotalRow.vue'
+import { TotalRowType } from '@/components/common/total-row'
+</script>
+
 <template>
   <article class="design-system-page section-stack">
     <section class="design-system-hero stack-md">
@@ -310,33 +315,19 @@
           The summary panel for final calculations and tax/tip adjustments.
         </p>
         <div class="spec-card type-code">
+          TotalRow.vue<br />
           .totals-panel<br />
-          .totals-row<br />
-          .totals-row--total<br />
-          .totals-row__total-value<br />
           .divider
         </div>
       </div>
 
       <div class="showcase-panel showcase-panel--stack">
         <div class="totals-panel">
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Subtotal</span>
-            <span class="type-number-md text-primary">$492.00</span>
-          </div>
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Tax (8.875%)</span>
-            <span class="type-number-md text-primary">$43.66</span>
-          </div>
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Tip</span>
-            <span class="type-number-md text-primary">$98.40</span>
-          </div>
+          <TotalRow label="Subtotal" value="$492.00" />
+          <TotalRow label="Tax (8.875%)" value="$43.66" />
+          <TotalRow label="Tip" value="$98.40" />
           <div class="divider"></div>
-          <div class="totals-row totals-row--total">
-            <span class="type-headline-md text-primary">Total</span>
-            <span class="type-number-md totals-row__total-value text-primary">$634.06</span>
-          </div>
+          <TotalRow label="Total" value="$634.06" :type="TotalRowType.Total" />
         </div>
       </div>
     </section>
