@@ -43,9 +43,7 @@ function confirmCrop(): void {
         aria-labelledby="qr-crop-dialog-title"
       >
         <div class="stack-xs">
-          <h2 id="qr-crop-dialog-title" class="type-headline-md text-primary">
-            Adjust QR Code
-          </h2>
+          <h2 id="qr-crop-dialog-title" class="type-headline-md text-primary">Adjust QR Code</h2>
           <p class="type-body-md text-muted">
             Make sure the QR code is fully visible. Drag, resize, or zoom to adjust.
           </p>
@@ -62,20 +60,8 @@ function confirmCrop(): void {
         </div>
 
         <div class="dialog-actions">
-          <button
-            class="button button--ghost"
-            type="button"
-            @click="emit('cancel')"
-          >
-            Cancel
-          </button>
-          <button
-            class="button button--primary"
-            type="button"
-            @click="confirmCrop"
-          >
-            Crop
-          </button>
+          <button class="button button--ghost" type="button" @click="emit('cancel')">Cancel</button>
+          <button class="button button--primary" type="button" @click="confirmCrop">Crop</button>
         </div>
       </section>
     </div>
