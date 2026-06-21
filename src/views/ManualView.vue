@@ -15,6 +15,7 @@ import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import ClassicReceiptDinerCard from '@/components/receipt/ClassicReceiptDinerCard.vue'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
 import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
@@ -750,82 +751,17 @@ watch(
             </SectionHeader>
 
             <div class="receipt-diner-grid">
-              <section
+              <ClassicReceiptDinerCard
                 v-for="(diner, index) in receiptCalculation.diners"
                 :key="diner.id"
-                class="receipt-diner-card"
-              >
-                <button
-                  class="receipt-diner-card__header"
-                  type="button"
-                  :aria-expanded="isReceiptDinerExpanded(diner.id)"
-                  @click="toggleReceiptDiner(diner.id)"
-                >
-                  <span>{{ diner.name || `Diner ${index + 1}` }}</span>
-                  <span class="material-symbols-outlined" aria-hidden="true">
-                    {{ isReceiptDinerExpanded(diner.id) ? 'expand_less' : 'expand_more' }}
-                  </span>
-                </button>
-
-                <ul class="receipt-line-list">
-                  <li class="receipt-line">
-                    <span>Food Total</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.subtotal) }}</span>
-                  </li>
-                  <li class="receipt-line">
-                    <span>Fees &amp; VAT</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.fees) }}</span>
-                  </li>
-                  <li v-if="isRoundingEnabled" class="receipt-line">
-                    <span>Rounding</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatSignedCurrency(diner.rounding) }}</span>
-                  </li>
-                  <template v-if="isReceiptDinerExpanded(diner.id)">
-                    <li
-                      v-for="item in diner.items"
-                      :key="`${item.source}-${item.id}`"
-                      class="receipt-line receipt-line--itemized"
-                    >
-                      <span>{{ item.name || 'Untitled item' }}</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(item.amount) }}</span>
-                    </li>
-                    <li class="receipt-line receipt-line--itemized">
-                      <span>Service</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.service) }}</span>
-                    </li>
-                    <li class="receipt-line receipt-line--itemized">
-                      <span>VAT</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.tax) }}</span>
-                    </li>
-                    <li v-if="diner.adjustments > 0" class="receipt-line receipt-line--itemized">
-                      <span>Adjustments</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.adjustments) }}</span>
-                    </li>
-                    <li v-if="diner.discount > 0" class="receipt-line receipt-line--itemized">
-                      <span>Discount</span>
-                      <span aria-hidden="true"></span>
-                      <span>-{{ formatCurrency(diner.discount) }}</span>
-                    </li>
-                    <li v-if="isRoundingEnabled" class="receipt-line receipt-line--itemized">
-                      <span>Rounding</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatSignedCurrency(diner.rounding) }}</span>
-                    </li>
-                  </template>
-                </ul>
-
-                <div class="receipt-diner-card__total type-label text-primary">
-                  <span>Total</span>
-                  <span>{{ formatCurrency(diner.total) }}</span>
-                </div>
-              </section>
+                :diner="diner"
+                :diner-index="index"
+                :format-currency="formatCurrency"
+                :format-signed-currency="formatSignedCurrency"
+                :is-expanded="isReceiptDinerExpanded(diner.id)"
+                :is-rounding-enabled="isRoundingEnabled"
+                @toggle="toggleReceiptDiner"
+              />
             </div>
           </section>
 
