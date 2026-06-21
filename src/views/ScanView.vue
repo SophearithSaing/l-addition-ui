@@ -1,67 +1,55 @@
 <script setup lang="ts">
+import PageHero from '@/components/common/PageHero.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import RecentReceiptCard from '@/components/scan/RecentReceiptCard.vue'
+import RecentReceiptList from '@/components/scan/RecentReceiptList.vue'
+import UploadZone from '@/components/scan/UploadZone.vue'
 </script>
 
 <template>
   <PublicLayout>
     <main class="scan-page app-container">
-      <section class="scan-hero stack-sm" aria-labelledby="scan-title">
-        <h1 id="scan-title" class="type-display-lg text-primary">The Digital Concierge awaits.</h1>
-        <p class="type-body-lg text-muted">
-          Drop your receipt here or select a file to begin the art of the split.
-        </p>
-      </section>
+      <PageHero
+        title-id="scan-title"
+        title="The Digital Concierge awaits."
+        description="Drop your receipt here or select a file to begin the art of the split."
+      />
 
-      <label class="upload-zone" for="file-upload">
-        <span class="upload-zone__glow" aria-hidden="true"></span>
-        <span class="material-symbols-outlined upload-zone__icon" aria-hidden="true">
-          receipt_long
-        </span>
-        <span class="type-label text-primary">Upload Receipt</span>
-        <span class="type-body-md text-muted">JPG, PNG or PDF (Max 10MB)</span>
-        <span class="upload-zone__action type-label">Browse Files</span>
-        <input
-          id="file-upload"
-          class="visually-hidden"
-          accept="image/jpeg, image/png, application/pdf"
-          type="file"
-        />
-      </label>
+      <UploadZone
+        input-id="file-upload"
+        icon="receipt_long"
+        title="Upload Receipt"
+        helper-text="JPG, PNG or PDF (Max 10MB)"
+        action-label="Browse Files"
+        accept="image/jpeg, image/png, application/pdf"
+      />
 
       <section class="recent-section stack-md" aria-labelledby="recent-title">
         <h2 id="recent-title" class="recent-section__title type-headline-md text-primary">
           Recent Concierge Services
         </h2>
-        <div class="recent-card-grid">
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">restaurant</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Le Cinq</h3>
-              <p class="type-label text-muted">Oct 24, 2023 • €420.00</p>
-            </div>
-          </article>
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">local_cafe</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Café de Flore</h3>
-              <p class="type-label text-muted">Oct 22, 2023 • €45.50</p>
-            </div>
-          </article>
-          <article class="recent-card">
-            <span class="recent-card__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">wine_bar</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-body-md text-primary">Septime</h3>
-              <p class="type-label text-muted">Oct 15, 2023 • €180.00</p>
-            </div>
-          </article>
-        </div>
+        <RecentReceiptList>
+          <RecentReceiptCard icon="restaurant" title="Le Cinq" meta="Oct 24, 2023 • €420.00" />
+          <RecentReceiptCard
+            icon="local_cafe"
+            title="Café de Flore"
+            meta="Oct 22, 2023 • €45.50"
+          />
+          <RecentReceiptCard icon="wine_bar" title="Septime" meta="Oct 15, 2023 • €180.00" />
+        </RecentReceiptList>
       </section>
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.scan-page {
+  width: 100%;
+  padding-block: var(--space-section);
+}
+
+.recent-section__title {
+  border-bottom: var(--border-subtle);
+  padding-bottom: var(--space-sm);
+}
+</style>

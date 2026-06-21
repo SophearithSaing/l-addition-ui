@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import TotalRow from '@/components/common/TotalRow.vue'
+import { TotalRowType } from '@/components/common/types/total-row'
+</script>
+
 <template>
   <article class="design-system-page section-stack">
     <section class="design-system-hero stack-md">
@@ -310,35 +315,160 @@
           The summary panel for final calculations and tax/tip adjustments.
         </p>
         <div class="spec-card type-code">
+          TotalRow.vue<br />
           .totals-panel<br />
-          .totals-row<br />
-          .totals-row--total<br />
-          .totals-row__total-value<br />
           .divider
         </div>
       </div>
 
       <div class="showcase-panel showcase-panel--stack">
         <div class="totals-panel">
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Subtotal</span>
-            <span class="type-number-md text-primary">$492.00</span>
-          </div>
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Tax (8.875%)</span>
-            <span class="type-number-md text-primary">$43.66</span>
-          </div>
-          <div class="totals-row">
-            <span class="type-body-md text-muted">Tip</span>
-            <span class="type-number-md text-primary">$98.40</span>
-          </div>
+          <TotalRow label="Subtotal" value="$492.00" />
+          <TotalRow label="Tax (8.875%)" value="$43.66" />
+          <TotalRow label="Tip" value="$98.40" />
           <div class="divider"></div>
-          <div class="totals-row totals-row--total">
-            <span class="type-headline-md text-primary">Total</span>
-            <span class="type-number-md totals-row__total-value text-primary">$634.06</span>
-          </div>
+          <TotalRow label="Total" value="$634.06" :type="TotalRowType.Total" />
         </div>
       </div>
     </section>
   </article>
 </template>
+
+<style scoped>
+.showcase-panel {
+  min-height: 176px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  border: var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  background: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-ambient);
+}
+
+.showcase-panel--stack {
+  min-height: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--space-lg);
+}
+
+.showcase-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.showcase-label {
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-body);
+  font-size: var(--type-label-sm-size);
+  font-weight: var(--type-label-md-weight);
+  line-height: var(--type-label-sm-line);
+  letter-spacing: var(--type-label-md-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.diner-avatar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-on-surface-variant);
+}
+
+.diner-avatar__mark {
+  position: relative;
+  width: var(--space-2xl);
+  height: var(--space-2xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-container-low);
+  transition: all var(--motion-smooth);
+}
+
+.diner-avatar--selected {
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.diner-avatar--selected .diner-avatar__mark {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-ambient);
+}
+
+.diner-avatar--assigned .diner-avatar__mark {
+  opacity: 0.8;
+}
+
+.diner-avatar__badge {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  right: calc(var(--space-2xs) * -1);
+  width: var(--space-md);
+  height: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+}
+
+.receipt-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  background: var(--color-surface-bright);
+  box-shadow: var(--shadow-ambient);
+  transition: border-color var(--motion-smooth);
+}
+
+.receipt-item-card:hover {
+  border-color: var(--color-primary);
+}
+
+.receipt-item-card--assigned {
+  border-color: var(--color-outline-variant);
+  background: var(--color-surface-container-low);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.diner-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  border: var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+}
+
+.diner-card__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.diner-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+</style>

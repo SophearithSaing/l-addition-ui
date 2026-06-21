@@ -1,65 +1,56 @@
 <script setup lang="ts">
+import PageHero from '@/components/common/PageHero.vue'
+import { PageHeroType } from '@/components/common/types/page-hero'
+import HomeChoiceCard from '@/components/home/HomeChoiceCard.vue'
+import HomeStartOptions from '@/components/home/HomeStartOptions.vue'
+import { HomeChoiceCardType } from '@/components/home/types/home-choice-card'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 </script>
 
 <template>
   <PublicLayout>
     <main class="home-select app-container">
-      <section class="home-select__hero stack-sm" aria-labelledby="home-title">
-        <div class="eyebrow-divider type-label text-muted">
-          <span aria-hidden="true"></span>
-          Choose How to Start
-          <span aria-hidden="true"></span>
-        </div>
-        <h1 id="home-title" class="type-display-lg text-primary">The Art of the Split</h1>
-        <p class="type-body-md text-muted">
-          Upload your bill or enter items manually to begin a seamless division of the expenses.
-        </p>
-      </section>
+      <PageHero
+        title-id="home-title"
+        title="The Art of the Split"
+        eyebrow="Choose How to Start"
+        description="Upload your bill or enter items manually to begin a seamless division of the expenses."
+        :type="PageHeroType.Home"
+      />
 
-      <section class="home-choice-grid" aria-label="Bill entry options">
-        <!-- <RouterLink
-          class="home-choice-card home-choice-card--scan"
-          to="/scan"
-        >
-          <span class="home-choice-card__glow" aria-hidden="true"></span>
-          <span class="home-choice-card__icon" aria-hidden="true">
-            <span class="material-symbols-outlined icon-lg">receipt_long</span>
-          </span>
-          <span class="home-choice-card__copy stack-xs">
-            <span class="type-body-lg text-primary">Upload Receipt</span>
-            <span class="type-body-md text-muted">
-              We'll automatically itemize the bill so you can review and assign them.
-            </span>
-          </span>
-        </RouterLink> -->
+      <HomeStartOptions>
+        <template #scan>
+          <HomeChoiceCard
+            icon="receipt_long"
+            title="Upload Receipt"
+            description="We'll automatically itemize the bill so you can review and assign them."
+            to="/scan"
+            :type="HomeChoiceCardType.Scan"
+            disabled
+          />
+        </template>
 
-        <div class="home-choice-card home-choice-card--disabled home-choice-card--scan" to="/scan">
-          <span class="home-choice-card__glow" aria-hidden="true"></span>
-          <span class="home-choice-card__icon" aria-hidden="true">
-            <span class="material-symbols-outlined icon-lg">receipt_long</span>
-          </span>
-          <span class="home-choice-card__copy stack-xs">
-            <span class="type-body-lg text-primary">Upload Receipt</span>
-            <span class="type-body-md text-muted">
-              We'll automatically itemize the bill so you can review and assign them.
-            </span>
-          </span>
-        </div>
-        <div class="home-choice-divider type-label text-muted" aria-hidden="true">or</div>
-
-        <RouterLink class="home-choice-card" to="/manual">
-          <span class="home-choice-card__icon" aria-hidden="true">
-            <span class="material-symbols-outlined icon-lg">edit_square</span>
-          </span>
-          <span class="home-choice-card__copy stack-xs">
-            <span class="type-body-lg text-primary">Start Manual Entry</span>
-            <span class="type-body-md text-muted"
-              >Input items and assign them to diners yourself.</span
-            >
-          </span>
-        </RouterLink>
-      </section>
+        <template #manual>
+          <HomeChoiceCard
+            icon="edit_square"
+            title="Start Manual Entry"
+            description="Input items and assign them to diners yourself."
+            to="/manual"
+          />
+        </template>
+      </HomeStartOptions>
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.home-select {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-section);
+  padding-block: var(--space-section);
+}
+</style>

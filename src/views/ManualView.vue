@@ -3,7 +3,22 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
+import DinerSection from '@/components/manual/DinerSection.vue'
+import ManualContextForm from '@/components/manual/ManualContextForm.vue'
+import ManualSummaryPanel from '@/components/manual/ManualSummaryPanel.vue'
+import PageHero from '@/components/common/PageHero.vue'
+import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
+import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import ClassicReceipt from '@/components/receipt/ClassicReceipt.vue'
+import type { ClassicReceiptExpose } from '@/components/receipt/types/classic-receipt'
+import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
+import PolishedReceipt from '@/components/receipt/PolishedReceipt.vue'
+import type { PolishedReceiptExpose } from '@/components/receipt/types/polished-receipt'
+import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
+import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
+import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
+import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
 interface ManualItem {
@@ -33,7 +48,7 @@ interface ManualAdjustment {
 
 interface ManualDraftState {
   restaurantName: string
-  currency: string
+  currency: CurrencyCode
   customCurrency: string
   serviceCharge: string
   taxRate: string
@@ -47,7 +62,7 @@ interface ManualDraftState {
 
 const manualDraftStorageKey = 'l-addition.manual-draft'
 const restaurantName = ref('')
-const currency = ref('THB')
+const currency = ref<CurrencyCode>(CurrencyCode.Thb)
 const customCurrency = ref('')
 const serviceCharge = ref('')
 const taxRate = ref('')
@@ -61,13 +76,13 @@ const isReceiptGenerated = ref(false)
 const isReceiptDownloading = ref(false)
 const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
-const receiptVariant = ref<'classic' | 'polished'>('classic')
+const receiptVariant = ref<ReceiptVariant>(ReceiptVariant.Classic)
 const qrCodeImageUrl = ref<string | null>(null)
 const qrCropImageSrc = ref<string | null>(null)
 const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
-const receiptPanel = ref<HTMLElement | null>(null)
-const receiptExportFrame = ref<HTMLElement | null>(null)
+const receiptPanel = ref<ClassicReceiptExpose | PolishedReceiptExpose | null>(null)
+const receiptExportFrame = ref<ReceiptExportFrameExpose | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
 let nextSharedItemId = 1
@@ -119,7 +134,7 @@ const hasBillData = computed(() => {
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
     isRoundingEnabled.value !== true ||
-    currency.value !== 'THB' ||
+    currency.value !== CurrencyCode.Thb ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
     adjustments.value.length > 0 ||
@@ -150,11 +165,11 @@ const areAllReceiptDinersExpanded = computed(() => {
   )
 })
 const currencySymbol = computed(() => {
-  if (currency.value === 'THB') {
+  if (currency.value === CurrencyCode.Thb) {
     return '฿'
   }
 
-  if (currency.value === 'custom') {
+  if (currency.value === CurrencyCode.Custom) {
     return customCurrency.value.trim() || '$'
   }
 
@@ -202,30 +217,6 @@ function formatSignedCurrency(amount: number): string {
 }
 
 /**
- * Gets the sign for an amount.
- *
- * @param amount Amount to inspect.
- * @returns Minus sign for negative amounts, otherwise plus sign.
- */
-function getAmountSign(amount: number): string {
-  if (amount < 0) {
-    return '-'
-  }
-
-  return '+'
-}
-
-/**
- * Formats an absolute amount without a currency symbol.
- *
- * @param amount Amount to format.
- * @returns Absolute formatted amount label.
- */
-function formatAbsoluteAmount(amount: number): string {
-  return Math.abs(amount).toFixed(2)
-}
-
-/**
  * Builds the current manual bill draft for persistence.
  *
  * @returns Serializable manual bill draft.
@@ -253,7 +244,7 @@ function getManualDraftState(): ManualDraftState {
  */
 function restoreManualDraftState(draft: ManualDraftState): void {
   adjustments.value = draft.adjustments ?? []
-  currency.value = draft.currency || 'THB'
+  currency.value = draft.currency || CurrencyCode.Thb
   customCurrency.value = draft.customCurrency ?? ''
   diners.value = draft.diners ?? []
   discount.value = draft.discount ?? ''
@@ -325,7 +316,7 @@ function closeClearDialog(): void {
 function confirmClearBill(): void {
   shouldSkipNextDraftSave.value = true
   restaurantName.value = ''
-  currency.value = 'THB'
+  currency.value = CurrencyCode.Thb
   customCurrency.value = ''
   serviceCharge.value = ''
   taxRate.value = ''
@@ -355,15 +346,6 @@ function blockInvalidNumberKey(event: KeyboardEvent): void {
   if (['e', 'E', '+', '-'].includes(event.key)) {
     event.preventDefault()
   }
-}
-
-/**
- * Selects the active discount unit.
- *
- * @param unit Discount unit to use.
- */
-function setDiscountUnit(unit: 'fixed' | 'percentage'): void {
-  discountUnit.value = unit
 }
 
 /**
@@ -489,24 +471,13 @@ function removeAdjustment(adjustmentId: number): void {
 }
 
 /**
- * Gets a diner display label.
- *
- * @param diner Diner to label.
- * @param index Diner index.
- * @returns Diner name, or fallback label.
- */
-function getDinerLabel(diner: ManualDiner, index: number): string {
-  return diner.name.trim() || `Diner ${index + 1}`
-}
-
-/**
  * Shows the generated receipt and opens all diner breakdowns.
  */
 function generateReceipt(): void {
   isReceiptGenerated.value = true
   expandedDinerIds.value = []
   nextTick(() => {
-    receiptPanel.value?.scrollIntoView({
+    getReceiptPanelElement()?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
@@ -528,13 +499,18 @@ function toggleReceiptDiner(dinerId: number): void {
 }
 
 /**
- * Checks whether a diner receipt breakdown is expanded.
+ * Gets the generated receipt panel element.
  *
- * @param dinerId Diner id to check.
- * @returns Whether the diner breakdown is expanded.
+ * @returns Receipt panel element, or null when unavailable.
  */
-function isReceiptDinerExpanded(dinerId: number): boolean {
-  return expandedDinerIds.value.includes(dinerId)
+function getReceiptPanelElement(): HTMLElement | null {
+  const panel = receiptPanel.value
+
+  if (!panel) {
+    return null
+  }
+
+  return panel.getElement()
 }
 
 /**
@@ -602,14 +578,15 @@ function toggleAllReceiptDiners(): void {
  * Downloads the generated receipt as a PNG image.
  */
 async function downloadReceiptImage(): Promise<void> {
-  if (!receiptExportFrame.value || isReceiptDownloading.value) {
+  const node = receiptExportFrame.value?.getElement()
+
+  if (!node || isReceiptDownloading.value) {
     return
   }
 
   isReceiptDownloading.value = true
 
   try {
-    const node = receiptExportFrame.value
     const rect = node.getBoundingClientRect()
     const dataUrl = await toPng(node, {
       cacheBust: true,
@@ -657,664 +634,97 @@ watch(
 <template>
   <PublicLayout>
     <main class="manual-page app-container">
-      <section class="manual-hero stack-sm" aria-labelledby="manual-title">
-        <h1 id="manual-title" class="type-display-lg text-primary">The Art of the Split</h1>
-      </section>
+      <PageHero title-id="manual-title" title="The Art of the Split" />
 
       <div class="manual-layout">
         <section class="manual-diners stack-lg" aria-labelledby="diners-title">
-          <div class="manual-context-row">
-            <label class="quiet-field manual-context-row__restaurant">
-              <span class="manual-context-label">Restaurant Name</span>
-              <input
-                v-model="restaurantName"
-                class="input input--stationery type-headline-md"
-                placeholder="e.g. Le Meurice"
-              />
-            </label>
+          <ManualContextForm
+            v-model:restaurant-name="restaurantName"
+            v-model:currency="currency"
+            v-model:custom-currency="customCurrency"
+          />
 
-            <fieldset class="currency-field">
-              <legend class="manual-context-label">Currency</legend>
-              <div class="currency-field__controls">
-                <button
-                  class="currency-choice"
-                  :class="{ 'currency-choice--active': currency === 'USD' }"
-                  type="button"
-                  @click="currency = 'USD'"
-                >
-                  USD ($)
-                </button>
-                <button
-                  class="currency-choice"
-                  :class="{ 'currency-choice--active': currency === 'THB' }"
-                  type="button"
-                  @click="currency = 'THB'"
-                >
-                  THB (฿)
-                </button>
-                <label
-                  class="currency-custom"
-                  :class="{ 'currency-custom--active': currency === 'custom' }"
-                >
-                  <input
-                    v-model="customCurrency"
-                    class="currency-custom__input"
-                    placeholder="Custom"
-                    maxlength="4"
-                    @focus="currency = 'custom'"
-                  />
-                </label>
-              </div>
-            </fieldset>
-          </div>
+          <DinerSection
+            :diners="diners"
+            :currency-symbol="currencySymbol"
+            @add-diner="addDiner"
+            @remove-last-diner="removeLastDiner"
+            @remove-diner="removeDiner"
+            @add-item="addItem"
+            @remove-item="removeItem"
+            @amount-keydown="blockInvalidNumberKey"
+          />
 
-          <div class="split-row manual-section-title">
-            <h2 id="diners-title" class="type-headline-md text-primary">Diners</h2>
-            <div class="cluster">
-              <button
-                class="button button--outline button--icon"
-                type="button"
-                aria-label="Remove last diner"
-                :disabled="diners.length === 0"
-                @click="removeLastDiner"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">remove</span>
-              </button>
-              <button
-                class="button button--primary button--icon"
-                type="button"
-                aria-label="Add diner"
-                @click="addDiner"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              </button>
-            </div>
-          </div>
-
-          <article v-if="diners.length === 0" class="manual-empty-state stack-md">
-            <span class="manual-empty-state__icon" aria-hidden="true">
-              <span class="material-symbols-outlined icon-lg">group_add</span>
-            </span>
-            <div class="stack-xs">
-              <h3 class="type-headline-md text-primary">No diners yet</h3>
-              <p class="type-body-md text-muted">
-                Add a diner to begin entering items and building the split.
-              </p>
-            </div>
-            <button class="button button--primary" type="button" @click="addDiner">
-              Add Diner
-            </button>
-          </article>
-
-          <article v-for="diner in diners" :key="diner.id" class="manual-diner-card">
-            <div class="split-row">
-              <label class="quiet-field manual-diner-card__name">
-                <span class="field__label">Diner Name</span>
-                <input
-                  v-model="diner.name"
-                  class="input input--stationery type-headline-md"
-                  placeholder="Enter name..."
-                />
-              </label>
-              <button
-                class="button button--ghost button--icon"
-                type="button"
-                aria-label="Remove diner"
-                @click="removeDiner(diner.id)"
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">close</span>
-              </button>
-            </div>
-
-            <div class="stack-sm">
-              <p v-if="diner.items.length === 0" class="type-body-md text-muted">
-                No items assigned to this diner yet.
-              </p>
-
-              <div v-for="item in diner.items" :key="item.id" class="manual-item-row">
-                <input v-model="item.name" class="manual-item-row__name" placeholder="Item name" />
-                <span class="manual-item-row__price">
-                  <span class="text-muted">{{ currencySymbol }}</span>
-                  <input
-                    v-model="item.amount"
-                    inputmode="decimal"
-                    min="0"
-                    placeholder="0.00"
-                    step="0.01"
-                    type="number"
-                    @keydown="blockInvalidNumberKey"
-                  />
-                </span>
-                <button
-                  class="inline-icon-action"
-                  type="button"
-                  aria-label="Remove item"
-                  @click="removeItem(diner, item.id)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>
-              </div>
-
-              <button class="inline-text-action type-label" type="button" @click="addItem(diner)">
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-                Add Item
-              </button>
-            </div>
-          </article>
-
-          <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
-            <div class="split-row manual-section-title">
-              <h2 id="shared-items-title" class="type-headline-md text-primary">Shared Items</h2>
-              <button class="inline-text-action type-label" type="button" @click="addSharedItem">
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
-                Add Shared Item
-              </button>
-            </div>
-
-            <p v-if="sharedItems.length === 0" class="type-body-md text-muted">
-              Add items that should be split across multiple diners.
-            </p>
-
-            <article v-for="item in sharedItems" :key="item.id" class="manual-diner-card">
-              <div class="manual-item-row manual-item-row--active">
-                <input
-                  v-model="item.name"
-                  class="manual-item-row__name type-headline-md"
-                  placeholder="Shared item name"
-                />
-                <span class="manual-item-row__price">
-                  <span class="text-muted">{{ currencySymbol }}</span>
-                  <input
-                    v-model="item.amount"
-                    inputmode="decimal"
-                    min="0"
-                    placeholder="0.00"
-                    step="0.01"
-                    type="number"
-                    @keydown="blockInvalidNumberKey"
-                  />
-                </span>
-                <button
-                  class="inline-icon-action"
-                  type="button"
-                  aria-label="Remove shared item"
-                  @click="removeSharedItem(item.id)"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>
-              </div>
-
-              <div class="stack-xs">
-                <p class="shared-participant-label type-label text-muted">Participating Diners</p>
-                <p v-if="diners.length === 0" class="type-body-md text-muted">
-                  Add diners to choose who participates.
-                </p>
-                <div v-else class="shared-participant-list">
-                  <button
-                    v-for="(diner, index) in diners"
-                    :key="diner.id"
-                    class="shared-participant"
-                    :class="{
-                      'shared-participant--active': item.participantIds.includes(diner.id),
-                    }"
-                    type="button"
-                    @click="toggleSharedParticipant(item, diner.id)"
-                  >
-                    {{ getDinerLabel(diner, index) }}
-                  </button>
-                </div>
-              </div>
-            </article>
-          </section>
+          <SharedItemsSection
+            :diners="diners"
+            :shared-items="sharedItems"
+            :currency-symbol="currencySymbol"
+            @add-shared-item="addSharedItem"
+            @remove-shared-item="removeSharedItem"
+            @toggle-participant="toggleSharedParticipant"
+            @amount-keydown="blockInvalidNumberKey"
+          />
         </section>
 
-        <aside class="manual-summary stack-lg" aria-label="Bill summary">
-          <section class="stack-md">
-            <h2 class="type-label text-muted">Adjustments</h2>
-            <label class="summary-input-row">
-              <span>Service Charge</span>
-              <span>
-                <input
-                  v-model="serviceCharge"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />%
-              </span>
-            </label>
-            <label class="summary-input-row">
-              <span>VAT</span>
-              <span>
-                <input
-                  v-model="taxRate"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />%
-              </span>
-            </label>
-            <div class="summary-input-row">
-              <span>Discount</span>
-              <span class="discount-control">
-                <button
-                  class="discount-control__unit"
-                  :class="{ 'discount-control__unit--active': discountUnit === 'fixed' }"
-                  type="button"
-                  aria-label="Use fixed discount"
-                  :aria-pressed="discountUnit === 'fixed'"
-                  @click="setDiscountUnit('fixed')"
-                >
-                  {{ currencySymbol }}
-                </button>
-                <input
-                  v-model="discount"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0.00"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />
-                <button
-                  class="discount-control__unit"
-                  :class="{ 'discount-control__unit--active': discountUnit === 'percentage' }"
-                  type="button"
-                  aria-label="Use percentage discount"
-                  :aria-pressed="discountUnit === 'percentage'"
-                  @click="setDiscountUnit('percentage')"
-                >
-                  %
-                </button>
-              </span>
-            </div>
-            <div
-              v-for="adjustment in adjustments"
-              :key="adjustment.id"
-              class="summary-input-row summary-input-row--editable"
-            >
-              <input v-model="adjustment.label" class="summary-label-input" placeholder="Label" />
-              <span class="discount-control">
-                <span class="discount-control__unit discount-control__unit--active">
-                  {{ currencySymbol }}
-                </span>
-                <input
-                  v-model="adjustment.amount"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0.00"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />
-                <button
-                  class="discount-control__unit discount-control__unit--remove"
-                  type="button"
-                  aria-label="Remove adjustment"
-                  @click="removeAdjustment(adjustment.id)"
-                >
-                  ×
-                </button>
-              </span>
-            </div>
-            <button
-              class="inline-text-action inline-text-action--muted type-label"
-              type="button"
-              @click="addAdjustment"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              Add Adjustment
-            </button>
-            <label class="summary-toggle-row summary-toggle-row--switch">
-              <span>Round Totals</span>
-              <span class="summary-switch-control">
-                <small>Nearest {{ currencySymbol }}</small>
-                <input v-model="isRoundingEnabled" type="checkbox" />
-                <span aria-hidden="true"></span>
-              </span>
-            </label>
-          </section>
-
-          <section class="stack-sm">
-            <div class="totals-row">
-              <span class="type-body-md text-muted">Subtotal</span>
-              <span class="type-number-md text-primary">{{ formatCurrency(subtotal) }}</span>
-            </div>
-            <div class="totals-row">
-              <span class="type-body-md text-muted">VAT &amp; Fees</span>
-              <span class="type-number-md text-primary">{{ formatCurrency(taxAndFees) }}</span>
-            </div>
-            <div v-if="additionalAdjustmentsTotal > 0" class="totals-row">
-              <span class="type-body-md text-muted">Adjustments</span>
-              <span class="type-number-md text-primary">
-                {{ formatCurrency(additionalAdjustmentsTotal) }}
-              </span>
-            </div>
-            <div class="totals-row totals-row--total">
-              <span class="type-headline-md text-primary">Total</span>
-              <span class="manual-total-value text-primary">{{ formatCurrency(total) }}</span>
-            </div>
-          </section>
-
-          <div class="manual-summary__actions">
-            <button
-              class="button button--primary manual-summary__action"
-              type="button"
-              :disabled="!hasItems"
-              @click="generateReceipt"
-            >
-              Generate Receipt
-              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-            </button>
-            <button
-              class="button button--outline manual-summary__action"
-              type="button"
-              :disabled="!hasBillData"
-              @click="openClearDialog"
-            >
-              Clear
-              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </aside>
+        <ManualSummaryPanel
+          v-model:service-charge="serviceCharge"
+          v-model:tax-rate="taxRate"
+          v-model:discount="discount"
+          v-model:discount-unit="discountUnit"
+          v-model:is-rounding-enabled="isRoundingEnabled"
+          :adjustments="adjustments"
+          :additional-adjustments-total="
+            additionalAdjustmentsTotal > 0 ? formatCurrency(additionalAdjustmentsTotal) : ''
+          "
+          :currency-symbol="currencySymbol"
+          :has-bill-data="hasBillData"
+          :has-items="hasItems"
+          :subtotal="formatCurrency(subtotal)"
+          :tax-and-fees="formatCurrency(taxAndFees)"
+          :total="formatCurrency(total)"
+          @amount-keydown="blockInvalidNumberKey"
+          @add-adjustment="addAdjustment"
+          @remove-adjustment="removeAdjustment"
+          @generate-receipt="generateReceipt"
+          @clear-bill="openClearDialog"
+        />
       </div>
 
-      <div v-if="isReceiptGenerated" class="receipt-variant-controls">
-        <div class="receipt-variant-switch" aria-label="Receipt style">
-          <button
-            class="receipt-variant-switch__option"
-            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'classic' }"
-            type="button"
-            :aria-pressed="receiptVariant === 'classic'"
-            @click="receiptVariant = 'classic'"
-          >
-            Classic
-          </button>
-          <button
-            class="receipt-variant-switch__option"
-            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'polished' }"
-            type="button"
-            :aria-pressed="receiptVariant === 'polished'"
-            @click="receiptVariant = 'polished'"
-          >
-            Polished
-          </button>
-        </div>
-      </div>
+      <ReceiptVariantSwitch v-if="isReceiptGenerated" v-model="receiptVariant" />
 
-      <div
+      <ReceiptExportFrame
         v-if="isReceiptGenerated"
         ref="receiptExportFrame"
-        class="receipt-export-frame"
-        :class="{ 'receipt-export-frame--polished': receiptVariant === 'polished' }"
+        :is-polished="receiptVariant === ReceiptVariant.Polished"
       >
-        <article
-          v-if="receiptVariant === 'classic'"
+        <ClassicReceipt
+          v-if="receiptVariant === ReceiptVariant.Classic"
           ref="receiptPanel"
-          class="receipt-panel"
-          aria-labelledby="receipt-title"
-        >
-          <header class="receipt-panel__header stack-sm">
-            <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
-            <h2 id="receipt-title" class="type-display-lg text-primary">
-              {{ restaurantName || "L'Addition Receipt" }}
-            </h2>
-            <div class="receipt-panel__meta type-label text-muted">
-              <span>{{ receiptDate }}</span>
-            </div>
-          </header>
+          :are-all-diners-expanded="areAllReceiptDinersExpanded"
+          :calculation="receiptCalculation"
+          :expanded-diner-ids="expandedDinerIds"
+          :format-currency="formatCurrency"
+          :format-signed-currency="formatSignedCurrency"
+          :is-rounding-enabled="isRoundingEnabled"
+          :qr-code-image-url="qrCodeImageUrl"
+          :receipt-date="receiptDate"
+          :restaurant-name="restaurantName"
+          @toggle-all-diners="toggleAllReceiptDiners"
+          @toggle-diner="toggleReceiptDiner"
+        />
 
-          <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
-            <div class="receipt-section__header">
-              <h3 id="receipt-breakdown-title" class="type-headline-md text-primary">
-                Guest Breakdown
-              </h3>
-              <button
-                class="inline-text-action type-label"
-                type="button"
-                @click="toggleAllReceiptDiners"
-              >
-                {{ areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All' }}
-              </button>
-            </div>
-
-            <div class="receipt-diner-grid">
-              <section
-                v-for="(diner, index) in receiptCalculation.diners"
-                :key="diner.id"
-                class="receipt-diner-card"
-              >
-                <button
-                  class="receipt-diner-card__header"
-                  type="button"
-                  :aria-expanded="isReceiptDinerExpanded(diner.id)"
-                  @click="toggleReceiptDiner(diner.id)"
-                >
-                  <span>{{ diner.name || `Diner ${index + 1}` }}</span>
-                  <span class="material-symbols-outlined" aria-hidden="true">
-                    {{ isReceiptDinerExpanded(diner.id) ? 'expand_less' : 'expand_more' }}
-                  </span>
-                </button>
-
-                <ul class="receipt-line-list">
-                  <li class="receipt-line">
-                    <span>Food Total</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.subtotal) }}</span>
-                  </li>
-                  <li class="receipt-line">
-                    <span>Fees &amp; VAT</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatCurrency(diner.fees) }}</span>
-                  </li>
-                  <li v-if="isRoundingEnabled" class="receipt-line">
-                    <span>Rounding</span>
-                    <span aria-hidden="true"></span>
-                    <span>{{ formatSignedCurrency(diner.rounding) }}</span>
-                  </li>
-                  <template v-if="isReceiptDinerExpanded(diner.id)">
-                    <li
-                      v-for="item in diner.items"
-                      :key="`${item.source}-${item.id}`"
-                      class="receipt-line receipt-line--itemized"
-                    >
-                      <span>{{ item.name || 'Untitled item' }}</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(item.amount) }}</span>
-                    </li>
-                    <li class="receipt-line receipt-line--itemized">
-                      <span>Service</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.service) }}</span>
-                    </li>
-                    <li class="receipt-line receipt-line--itemized">
-                      <span>VAT</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.tax) }}</span>
-                    </li>
-                    <li v-if="diner.adjustments > 0" class="receipt-line receipt-line--itemized">
-                      <span>Adjustments</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatCurrency(diner.adjustments) }}</span>
-                    </li>
-                    <li v-if="diner.discount > 0" class="receipt-line receipt-line--itemized">
-                      <span>Discount</span>
-                      <span aria-hidden="true"></span>
-                      <span>-{{ formatCurrency(diner.discount) }}</span>
-                    </li>
-                    <li v-if="isRoundingEnabled" class="receipt-line receipt-line--itemized">
-                      <span>Rounding</span>
-                      <span aria-hidden="true"></span>
-                      <span>{{ formatSignedCurrency(diner.rounding) }}</span>
-                    </li>
-                  </template>
-                </ul>
-
-                <div class="receipt-diner-card__total type-label text-primary">
-                  <span>Total</span>
-                  <span>{{ formatCurrency(diner.total) }}</span>
-                </div>
-              </section>
-            </div>
-          </section>
-
-          <section
-            class="receipt-summary"
-            :class="{ 'receipt-summary--with-qr': qrCodeImageUrl }"
-            aria-label="Receipt total summary"
-          >
-            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
-              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
-            </aside>
-            <div class="receipt-summary__inner stack-sm">
-              <div class="totals-row">
-                <span class="type-body-md text-muted">Subtotal</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.subtotal)
-                }}</span>
-              </div>
-              <div class="totals-row">
-                <span class="type-body-md text-muted">Service</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.service)
-                }}</span>
-              </div>
-              <div class="totals-row">
-                <span class="type-body-md text-muted">VAT</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.tax)
-                }}</span>
-              </div>
-              <div v-if="receiptCalculation.adjustments > 0" class="totals-row">
-                <span class="type-body-md text-muted">Adjustments</span>
-                <span class="type-number-md text-primary">{{
-                  formatCurrency(receiptCalculation.adjustments)
-                }}</span>
-              </div>
-              <div v-if="receiptCalculation.discount > 0" class="totals-row">
-                <span class="type-body-md text-muted">Discount</span>
-                <span class="type-number-md text-primary"
-                  >-{{ formatCurrency(receiptCalculation.discount) }}</span
-                >
-              </div>
-              <div v-if="isRoundingEnabled" class="totals-row">
-                <span class="type-body-md text-muted">Rounding</span>
-                <span class="type-number-md text-primary">{{
-                  formatSignedCurrency(receiptCalculation.rounding)
-                }}</span>
-              </div>
-              <div class="totals-row totals-row--total receipt-summary__total">
-                <span class="type-label text-primary">Grand Total</span>
-                <span class="manual-total-value text-primary">{{
-                  formatCurrency(receiptCalculation.total)
-                }}</span>
-              </div>
-            </div>
-          </section>
-
-          <footer class="receipt-signature">
-            <span aria-hidden="true"></span>
-            <p>L'Addition</p>
-            <span aria-hidden="true"></span>
-          </footer>
-        </article>
-
-        <article
+        <PolishedReceipt
           v-else
           ref="receiptPanel"
-          class="receipt-polished"
-          aria-labelledby="polished-title"
-        >
-          <header class="receipt-polished__header">
-            <img class="receipt-polished__logo" src="/receipt-logo.png" alt="L'Addition" />
-            <h2 id="polished-title" class="receipt-polished__title">
-              {{ restaurantName || "L'Addition" }}
-            </h2>
-            <div class="receipt-polished__header-divider type-label text-muted">
-              <span aria-hidden="true"></span>
-              <span>{{ receiptDate }}</span>
-              <span aria-hidden="true"></span>
-            </div>
-          </header>
-
-          <section class="receipt-polished__guest-list" aria-label="Guest totals">
-            <div class="receipt-polished__guest receipt-polished__guest--header">
-              <span>Name</span>
-              <span>Details</span>
-              <span>Subtotal</span>
-            </div>
-            <article
-              v-for="(diner, index) in receiptCalculation.diners"
-              :key="diner.id"
-              class="receipt-polished__guest"
-            >
-              <h3>{{ diner.name || `Diner ${index + 1}` }}</h3>
-              <p>
-                {{ diner.subtotal.toFixed(2) }}
-                <span v-if="diner.fees !== 0" class="receipt-polished__detail-adjustment">
-                  <span>{{ getAmountSign(diner.fees) }}</span>
-                  <span>{{ formatAbsoluteAmount(diner.fees) }}</span>
-                </span>
-                <span v-if="isRoundingEnabled" class="receipt-polished__detail-adjustment">
-                  <span>{{ getAmountSign(diner.rounding) }}</span>
-                  <span>{{ formatAbsoluteAmount(diner.rounding) }}</span>
-                </span>
-              </p>
-              <strong>{{ formatCurrency(diner.total) }}</strong>
-            </article>
-          </section>
-
-          <section class="receipt-polished__summary" aria-label="Receipt summary">
-            <div>
-              <span>Subtotal</span>
-              <strong>{{ formatCurrency(receiptCalculation.subtotal) }}</strong>
-            </div>
-            <div>
-              <span>Service &amp; VAT</span>
-              <strong>{{
-                formatCurrency(receiptCalculation.service + receiptCalculation.tax)
-              }}</strong>
-            </div>
-            <div v-if="receiptCalculation.adjustments > 0">
-              <span>Adjustments</span>
-              <strong>{{ formatCurrency(receiptCalculation.adjustments) }}</strong>
-            </div>
-            <div v-if="receiptCalculation.discount > 0">
-              <span>Discount</span>
-              <strong>-{{ formatCurrency(receiptCalculation.discount) }}</strong>
-            </div>
-            <div v-if="isRoundingEnabled">
-              <span>Rounding</span>
-              <strong>{{ formatSignedCurrency(receiptCalculation.rounding) }}</strong>
-            </div>
-          </section>
-
-          <div
-            class="receipt-polished__settlement"
-            :class="{ 'receipt-polished__settlement--with-qr': qrCodeImageUrl }"
-          >
-            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
-              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
-            </aside>
-
-            <section class="receipt-polished__hero" aria-label="Grand total">
-              <span class="receipt-polished__hero-label">Grand Total</span>
-              <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
-            </section>
-          </div>
-
-          <footer class="receipt-polished__footer">
-            <span aria-hidden="true"></span>
-            <p>L'Addition</p>
-            <span aria-hidden="true"></span>
-          </footer>
-        </article>
-      </div>
+          :calculation="receiptCalculation"
+          :format-currency="formatCurrency"
+          :format-signed-currency="formatSignedCurrency"
+          :is-rounding-enabled="isRoundingEnabled"
+          :qr-code-image-url="qrCodeImageUrl"
+          :receipt-date="receiptDate"
+          :restaurant-name="restaurantName"
+        />
+      </ReceiptExportFrame>
 
       <ConfirmDialog
         :is-open="isClearDialogOpen"
@@ -1333,31 +743,39 @@ watch(
         @cancel="cancelQrCrop"
       />
 
-      <div v-if="isReceiptGenerated" class="receipt-actions">
-        <label class="button button--outline receipt-qr-upload">
-          Upload QR Code
-          <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
-          <input accept="image/*" type="file" @change="uploadQrCodeImage" />
-        </label>
-        <button
-          v-if="qrCodeImageUrl"
-          class="button button--ghost"
-          type="button"
-          @click="clearQrCodeImage"
-        >
-          Remove QR
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-        <button
-          class="button button--outline"
-          type="button"
-          :disabled="isReceiptDownloading"
-          @click="downloadReceiptImage"
-        >
-          {{ isReceiptDownloading ? 'Preparing Image…' : 'Download Image' }}
-          <span class="material-symbols-outlined" aria-hidden="true">download</span>
-        </button>
-      </div>
+      <ReceiptActions
+        v-if="isReceiptGenerated"
+        :has-qr-code="Boolean(qrCodeImageUrl)"
+        :is-downloading="isReceiptDownloading"
+        @upload-qr="uploadQrCodeImage"
+        @remove-qr="clearQrCodeImage"
+        @download="downloadReceiptImage"
+      />
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.manual-page {
+  padding-block: var(--space-lg);
+}
+
+.manual-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-gutter);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .manual-page {
+    padding-block: var(--space-section);
+  }
+}
+
+@media (min-width: 1024px) {
+  .manual-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  }
+}
+</style>

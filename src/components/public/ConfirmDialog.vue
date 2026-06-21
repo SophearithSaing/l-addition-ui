@@ -46,3 +46,32 @@ const titleId = computed(() => {
     </div>
   </Teleport>
 </template>
+
+<style scoped>
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-container-mobile);
+  background: color-mix(in srgb, var(--color-on-surface) 32%, transparent);
+}
+
+.dialog-panel {
+  width: min(100%, 420px);
+  border: var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  background: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-elevated);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+</style>
