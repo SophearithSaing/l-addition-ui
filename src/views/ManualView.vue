@@ -16,6 +16,7 @@ import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
+import ReceiptQrCode from '@/components/receipt/ReceiptQrCode.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -831,9 +832,7 @@ watch(
             :class="{ 'receipt-summary--with-qr': qrCodeImageUrl }"
             aria-label="Receipt total summary"
           >
-            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
-              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
-            </aside>
+            <ReceiptQrCode v-if="qrCodeImageUrl" :image-url="qrCodeImageUrl" />
             <div class="receipt-summary__inner stack-sm">
               <TotalRow label="Subtotal" :value="formatCurrency(receiptCalculation.subtotal)" />
               <TotalRow label="Service" :value="formatCurrency(receiptCalculation.service)" />
@@ -942,9 +941,7 @@ watch(
             class="receipt-polished__settlement"
             :class="{ 'receipt-polished__settlement--with-qr': qrCodeImageUrl }"
           >
-            <aside v-if="qrCodeImageUrl" class="receipt-qr" aria-label="Payment QR code">
-              <img :src="qrCodeImageUrl" alt="Uploaded payment QR code" />
-            </aside>
+            <ReceiptQrCode v-if="qrCodeImageUrl" :image-url="qrCodeImageUrl" />
 
             <section class="receipt-polished__hero" aria-label="Grand total">
               <span class="receipt-polished__hero-label">Grand Total</span>
