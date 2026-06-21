@@ -1088,29 +1088,6 @@ layer(vendor);
     align-items: start;
   }
 
-  .manual-diner-card {
-    position: relative;
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    overflow: hidden;
-    gap: var(--space-md);
-    background: var(--color-surface);
-    border: var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-sm);
-    box-shadow: var(--shadow-ambient);
-    transition: border-color var(--motion-smooth);
-  }
-
-  .manual-diner-card:hover {
-    border-color: var(--color-outline);
-  }
-
-  .manual-shared-section {
-    margin-top: var(--space-md);
-  }
-
   .summary-input-row {
     min-width: 0;
     display: flex;
@@ -2004,7 +1981,6 @@ layer(vendor);
       padding-block: var(--space-section);
     }
 
-    .manual-diner-card,
     .manual-summary {
       padding: var(--space-lg);
     }

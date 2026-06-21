@@ -6,10 +6,9 @@ import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import DinerSection from '@/components/manual/DinerSection.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
-import ManualItemRow from '@/components/manual/ManualItemRow.vue'
 import PageHero from '@/components/common/PageHero.vue'
-import SharedParticipantSelector from '@/components/manual/SharedParticipantSelector.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
+import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
 import {
   SectionHeaderLevel,
@@ -18,7 +17,6 @@ import {
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
-import { ManualItemRowType } from '@/components/manual/types/manual-item-row'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
@@ -683,40 +681,15 @@ watch(
             @amount-keydown="blockInvalidNumberKey"
           />
 
-          <section class="manual-shared-section stack-md" aria-labelledby="shared-items-title">
-            <SectionHeader
-              title-id="shared-items-title"
-              title="Shared Items"
-              :type="SectionHeaderType.Baseline"
-            >
-              <template #actions>
-                <InlineAction icon="add" text="Add Shared Item" @click="addSharedItem" />
-              </template>
-            </SectionHeader>
-
-            <p v-if="sharedItems.length === 0" class="type-body-md text-muted">
-              Add items that should be split across multiple diners.
-            </p>
-
-            <article v-for="item in sharedItems" :key="item.id" class="manual-diner-card">
-              <ManualItemRow
-                v-model:name="item.name"
-                v-model:amount="item.amount"
-                :currency-symbol="currencySymbol"
-                name-placeholder="Shared item name"
-                remove-label="Remove shared item"
-                :type="ManualItemRowType.Active"
-                @amount-keydown="blockInvalidNumberKey"
-                @remove="removeSharedItem(item.id)"
-              />
-
-              <SharedParticipantSelector
-                :diners="diners"
-                :participant-ids="item.participantIds"
-                @toggle-participant="toggleSharedParticipant(item, $event)"
-              />
-            </article>
-          </section>
+          <SharedItemsSection
+            :diners="diners"
+            :shared-items="sharedItems"
+            :currency-symbol="currencySymbol"
+            @add-shared-item="addSharedItem"
+            @remove-shared-item="removeSharedItem"
+            @toggle-participant="toggleSharedParticipant"
+            @amount-keydown="blockInvalidNumberKey"
+          />
         </section>
 
         <aside class="manual-summary stack-lg" aria-label="Bill summary">
