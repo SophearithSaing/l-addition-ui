@@ -956,10 +956,6 @@ layer(vendor);
     padding-bottom: var(--space-sm);
   }
 
-  .manual-page {
-    padding-block: var(--space-lg);
-  }
-
   .history-chip {
     display: inline-flex;
     align-items: center;
@@ -972,27 +968,6 @@ layer(vendor);
 
   .history-chip .material-symbols-outlined {
     font-size: var(--type-label-md-size);
-  }
-
-  .manual-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-gutter);
-    align-items: start;
-  }
-
-  @media (min-width: 768px) {
-    .manual-page {
-      padding-block: var(--space-section);
-    }
-
-  }
-
-  @media (min-width: 1024px) {
-    .manual-layout {
-      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-    }
-
   }
 
   .showcase-panel {

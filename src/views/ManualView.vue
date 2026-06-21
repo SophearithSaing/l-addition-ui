@@ -754,3 +754,28 @@ watch(
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.manual-page {
+  padding-block: var(--space-lg);
+}
+
+.manual-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-gutter);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .manual-page {
+    padding-block: var(--space-section);
+  }
+}
+
+@media (min-width: 1024px) {
+  .manual-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  }
+}
+</style>
