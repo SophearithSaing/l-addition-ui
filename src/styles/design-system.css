@@ -936,38 +936,22 @@ layer(vendor);
     }
   }
 
-  .public-header,
   .compact-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    right: 0;
+    left: 0;
     z-index: 50;
     background: var(--color-surface);
     border-bottom: var(--border-subtle);
   }
 
-  .compact-header {
-    position: fixed;
-    right: 0;
-    left: 0;
-  }
-
-  .public-nav,
   .compact-header__inner {
     min-height: var(--top-bar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-md);
-  }
-
-  .public-brand {
-    color: var(--color-primary);
-    font-family: var(--font-display);
-    font-size: var(--type-headline-md-size);
-    font-style: italic;
-    font-weight: var(--type-headline-md-weight);
-    line-height: var(--type-headline-md-line);
-    text-decoration: none;
   }
 
   .public-nav__links,
@@ -986,7 +970,6 @@ layer(vendor);
   }
 
   .public-nav__link,
-  .public-header-link,
   .public-login,
   .public-footer__links a {
     border: 0;
@@ -1001,7 +984,6 @@ layer(vendor);
 
   .public-nav__link:hover,
   .public-nav__link--active,
-  .public-header-link:hover,
   .public-login,
   .public-footer__links a:hover {
     color: var(--color-primary);
