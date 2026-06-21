@@ -89,7 +89,7 @@
 
     <section class="design-system-section design-system-section--foundation">
       <div class="stack-sm">
-        <h2 class="type-headline-md text-primary">Border Radii</h2>
+        <h2 class="type-headline-md text-primary">Border Radius</h2>
         <p class="type-body-md text-muted">
           Consistent corner treatment creates a refined, modern feel.
         </p>
