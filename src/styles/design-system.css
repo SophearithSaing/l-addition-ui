@@ -1188,52 +1188,6 @@ layer(vendor);
     gap: var(--space-xl) var(--space-2xl);
   }
 
-  .receipt-summary {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: var(--space-lg);
-    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
-    padding-top: var(--space-lg);
-  }
-
-  .receipt-summary--with-qr {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-  }
-
-  .receipt-summary--with-qr .receipt-summary__inner {
-    grid-column: 2;
-  }
-
-  .receipt-summary--with-qr .receipt-qr {
-    width: calc(var(--space-2xl) * 4);
-  }
-
-  @media (max-width: 767px) {
-    .receipt-summary--with-qr {
-      grid-template-columns: 1fr;
-    }
-
-    .receipt-summary--with-qr .receipt-summary__inner {
-      grid-column: 1;
-      grid-row: 1;
-      width: 100%;
-    }
-
-    .receipt-summary--with-qr .receipt-qr {
-      grid-row: 2;
-      margin-top: var(--space-md);
-      width: calc(var(--space-2xl) * 3);
-    }
-  }
-
-  .receipt-summary__inner {
-    width: min(100%, 420px);
-  }
-
   .receipt-signature {
     display: flex;
     align-items: center;

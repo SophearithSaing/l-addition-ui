@@ -11,11 +11,10 @@ import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
 import { SectionHeaderLevel, SectionHeaderType } from '@/components/common/types/section-header'
-import TotalRow from '@/components/common/TotalRow.vue'
-import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import ClassicReceiptDinerCard from '@/components/receipt/ClassicReceiptDinerCard.vue'
+import ClassicReceiptSummary from '@/components/receipt/ClassicReceiptSummary.vue'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
 import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
@@ -765,38 +764,13 @@ watch(
             </div>
           </section>
 
-          <section
-            class="receipt-summary"
-            :class="{ 'receipt-summary--with-qr': qrCodeImageUrl }"
-            aria-label="Receipt total summary"
-          >
-            <ReceiptQrCode v-if="qrCodeImageUrl" :image-url="qrCodeImageUrl" />
-            <div class="receipt-summary__inner stack-sm">
-              <TotalRow label="Subtotal" :value="formatCurrency(receiptCalculation.subtotal)" />
-              <TotalRow label="Service" :value="formatCurrency(receiptCalculation.service)" />
-              <TotalRow label="VAT" :value="formatCurrency(receiptCalculation.tax)" />
-              <TotalRow
-                v-if="receiptCalculation.adjustments > 0"
-                label="Adjustments"
-                :value="formatCurrency(receiptCalculation.adjustments)"
-              />
-              <TotalRow
-                v-if="receiptCalculation.discount > 0"
-                label="Discount"
-                :value="`-${formatCurrency(receiptCalculation.discount)}`"
-              />
-              <TotalRow
-                v-if="isRoundingEnabled"
-                label="Rounding"
-                :value="formatSignedCurrency(receiptCalculation.rounding)"
-              />
-              <TotalRow
-                label="Grand Total"
-                :value="formatCurrency(receiptCalculation.total)"
-                :type="TotalRowType.GrandTotal"
-              />
-            </div>
-          </section>
+          <ClassicReceiptSummary
+            :calculation="receiptCalculation"
+            :format-currency="formatCurrency"
+            :format-signed-currency="formatSignedCurrency"
+            :is-rounding-enabled="isRoundingEnabled"
+            :qr-code-image-url="qrCodeImageUrl"
+          />
 
           <footer class="receipt-signature">
             <span aria-hidden="true"></span>
