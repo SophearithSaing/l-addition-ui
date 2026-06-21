@@ -53,8 +53,8 @@ function getDinerLabel(
 
 <style scoped>
 .shared-participant-selector__label {
-  font-size: 10px;
-  line-height: 14px;
+  font-size: var(--type-label-sm-size);
+  line-height: var(--type-label-sm-line);
 }
 
 .shared-participant-selector__list {
