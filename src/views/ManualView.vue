@@ -3,6 +3,7 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
+import AdjustmentRow from '@/components/manual/AdjustmentRow.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import DinerSection from '@/components/manual/DinerSection.vue'
 import DiscountControl from '@/components/manual/DiscountControl.vue'
@@ -724,35 +725,15 @@ watch(
                 @amount-keydown="blockInvalidNumberKey"
               />
             </div>
-            <div
+            <AdjustmentRow
               v-for="adjustment in adjustments"
               :key="adjustment.id"
-              class="summary-input-row summary-input-row--editable"
-            >
-              <input v-model="adjustment.label" class="summary-label-input" placeholder="Label" />
-              <span class="discount-control">
-                <span class="discount-control__unit discount-control__unit--active">
-                  {{ currencySymbol }}
-                </span>
-                <input
-                  v-model="adjustment.amount"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0.00"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />
-                <button
-                  class="discount-control__unit discount-control__unit--remove"
-                  type="button"
-                  aria-label="Remove adjustment"
-                  @click="removeAdjustment(adjustment.id)"
-                >
-                  ×
-                </button>
-              </span>
-            </div>
+              v-model:label="adjustment.label"
+              v-model:amount="adjustment.amount"
+              :currency-symbol="currencySymbol"
+              @amount-keydown="blockInvalidNumberKey"
+              @remove="removeAdjustment(adjustment.id)"
+            />
             <InlineAction
               icon="add"
               text="Add Adjustment"
