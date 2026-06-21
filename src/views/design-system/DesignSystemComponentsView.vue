@@ -333,3 +333,131 @@ import { TotalRowType } from '@/components/common/types/total-row'
     </section>
   </article>
 </template>
+
+<style scoped>
+.showcase-panel {
+  min-height: 176px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  border: var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  background: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-ambient);
+}
+
+.showcase-panel--stack {
+  min-height: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--space-lg);
+}
+
+.showcase-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.diner-avatar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-on-surface-variant);
+}
+
+.diner-avatar__mark {
+  position: relative;
+  width: var(--space-2xl);
+  height: var(--space-2xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-container-low);
+  transition: all var(--motion-smooth);
+}
+
+.diner-avatar--selected {
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.diner-avatar--selected .diner-avatar__mark {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-ambient);
+}
+
+.diner-avatar--assigned .diner-avatar__mark {
+  opacity: 0.8;
+}
+
+.diner-avatar__badge {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  right: calc(var(--space-2xs) * -1);
+  width: var(--space-md);
+  height: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+}
+
+.receipt-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  background: var(--color-surface-bright);
+  box-shadow: var(--shadow-ambient);
+  transition: border-color var(--motion-smooth);
+}
+
+.receipt-item-card:hover {
+  border-color: var(--color-primary);
+}
+
+.receipt-item-card--assigned {
+  border-color: var(--color-outline-variant);
+  background: var(--color-surface-container-low);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.diner-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  border: var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+}
+
+.diner-card__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.diner-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+</style>

@@ -846,35 +846,6 @@ layer(vendor);
     background: var(--color-surface-container-low);
   }
 
-  .showcase-panel {
-    min-height: 176px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-lg);
-    background: var(--color-surface-container-lowest);
-    border: var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: var(--space-lg);
-    box-shadow: var(--shadow-ambient);
-  }
-
-  .showcase-panel--stack {
-    min-height: 0;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: var(--space-lg);
-  }
-
-  .showcase-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
   .showcase-label {
     color: var(--color-on-surface-variant);
     font-family: var(--font-body);
@@ -911,103 +882,6 @@ layer(vendor);
     width: 4px;
     background: var(--color-secondary);
     content: '';
-  }
-
-  .diner-avatar {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    color: var(--color-on-surface-variant);
-  }
-
-  .diner-avatar__mark {
-    position: relative;
-    width: 64px;
-    height: 64px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-surface-variant);
-    border-radius: var(--radius-pill);
-    background: var(--color-surface-container-low);
-    transition: all var(--motion-smooth);
-  }
-
-  .diner-avatar--selected {
-    color: var(--color-primary);
-    transform: scale(1.05);
-  }
-
-  .diner-avatar--selected .diner-avatar__mark {
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-    box-shadow: var(--shadow-ambient);
-  }
-
-  .diner-avatar--assigned .diner-avatar__mark {
-    opacity: 0.8;
-  }
-
-  .diner-avatar__badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-pill);
-    background: var(--color-secondary);
-    color: var(--color-on-secondary);
-  }
-
-  .receipt-item-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-md);
-    background: var(--color-surface-bright);
-    border: 1px solid var(--color-surface-variant);
-    border-radius: var(--radius-md);
-    padding: var(--space-sm);
-    box-shadow: var(--shadow-ambient);
-    transition: border-color var(--motion-smooth);
-  }
-
-  .receipt-item-card:hover {
-    border-color: var(--color-primary);
-  }
-
-  .receipt-item-card--assigned {
-    background: var(--color-surface-container-low);
-    border-color: var(--color-outline-variant);
-    box-shadow: none;
-    opacity: 0.6;
-  }
-
-  .diner-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    background: var(--color-surface);
-    border: var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-  }
-
-  .diner-card__items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  .diner-card__item {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    justify-content: space-between;
   }
 
   .totals-panel {
