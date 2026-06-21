@@ -364,6 +364,17 @@ import { TotalRowType } from '@/components/common/types/total-row'
   gap: var(--space-sm);
 }
 
+.showcase-label {
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-body);
+  font-size: var(--type-label-sm-size);
+  font-weight: var(--type-label-md-weight);
+  line-height: var(--type-label-sm-line);
+  letter-spacing: var(--type-label-md-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .diner-avatar {
   display: inline-flex;
   flex-direction: column;

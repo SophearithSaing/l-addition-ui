@@ -846,17 +846,6 @@ layer(vendor);
     background: var(--color-surface-container-low);
   }
 
-  .showcase-label {
-    color: var(--color-on-surface-variant);
-    font-family: var(--font-body);
-    font-size: 10px;
-    font-weight: var(--type-label-md-weight);
-    line-height: 14px;
-    letter-spacing: var(--type-label-md-tracking);
-    text-align: center;
-    text-transform: uppercase;
-  }
-
   .spec-card {
     background: var(--color-surface-container-low);
     border: var(--border-subtle);
@@ -1088,29 +1077,6 @@ layer(vendor);
     justify-content: center;
     background: var(--color-surface-container-highest);
     color: var(--color-primary);
-  }
-
-  .foundation-sample-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xl);
-    align-items: flex-start;
-  }
-
-  .foundation-sample-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  .foundation-container-label {
-    font-family: var(--font-body);
-    font-size: 10px;
-    font-weight: 300;
-    line-height: 14px;
-    letter-spacing: var(--type-label-md-tracking);
-    text-transform: uppercase;
   }
 
   .design-system-shadow-sample,

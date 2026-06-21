@@ -112,3 +112,39 @@
     </section>
   </article>
 </template>
+
+<style scoped>
+.foundation-sample-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-xl);
+}
+
+.foundation-sample-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.foundation-container-label {
+  font-family: var(--font-body);
+  font-size: var(--type-label-sm-size);
+  font-weight: 300;
+  line-height: var(--type-label-sm-line);
+  letter-spacing: var(--type-label-md-tracking);
+  text-transform: uppercase;
+}
+
+.showcase-label {
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-body);
+  font-size: var(--type-label-sm-size);
+  font-weight: var(--type-label-md-weight);
+  line-height: var(--type-label-sm-line);
+  letter-spacing: var(--type-label-md-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+</style>
