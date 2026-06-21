@@ -3,18 +3,15 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
-import InlineAction from '@/components/common/InlineAction.vue'
 import DinerSection from '@/components/manual/DinerSection.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualSummaryPanel from '@/components/manual/ManualSummaryPanel.vue'
 import PageHero from '@/components/common/PageHero.vue'
-import SectionHeader from '@/components/common/SectionHeader.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
-import { SectionHeaderLevel, SectionHeaderType } from '@/components/common/types/section-header'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
-import ClassicReceiptDinerCard from '@/components/receipt/ClassicReceiptDinerCard.vue'
-import ClassicReceiptSummary from '@/components/receipt/ClassicReceiptSummary.vue'
+import ClassicReceipt from '@/components/receipt/ClassicReceipt.vue'
+import type { ClassicReceiptExpose } from '@/components/receipt/types/classic-receipt'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
 import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
@@ -83,7 +80,7 @@ const qrCodeImageUrl = ref<string | null>(null)
 const qrCropImageSrc = ref<string | null>(null)
 const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
-const receiptPanel = ref<HTMLElement | null>(null)
+const receiptPanel = ref<ClassicReceiptExpose | HTMLElement | null>(null)
 const receiptExportFrame = ref<ReceiptExportFrameExpose | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
@@ -503,7 +500,7 @@ function generateReceipt(): void {
   isReceiptGenerated.value = true
   expandedDinerIds.value = []
   nextTick(() => {
-    receiptPanel.value?.scrollIntoView({
+    getReceiptPanelElement()?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
@@ -525,13 +522,22 @@ function toggleReceiptDiner(dinerId: number): void {
 }
 
 /**
- * Checks whether a diner receipt breakdown is expanded.
+ * Gets the generated receipt panel element.
  *
- * @param dinerId Diner id to check.
- * @returns Whether the diner breakdown is expanded.
+ * @returns Receipt panel element, or null when unavailable.
  */
-function isReceiptDinerExpanded(dinerId: number): boolean {
-  return expandedDinerIds.value.includes(dinerId)
+function getReceiptPanelElement(): HTMLElement | null {
+  const panel = receiptPanel.value
+
+  if (!panel) {
+    return null
+  }
+
+  if (panel instanceof HTMLElement) {
+    return panel
+  }
+
+  return panel.getElement()
 }
 
 /**
@@ -718,66 +724,21 @@ watch(
         ref="receiptExportFrame"
         :is-polished="receiptVariant === ReceiptVariant.Polished"
       >
-        <article
+        <ClassicReceipt
           v-if="receiptVariant === ReceiptVariant.Classic"
           ref="receiptPanel"
-          class="receipt-panel"
-          aria-labelledby="receipt-title"
-        >
-          <header class="receipt-panel__header stack-sm">
-            <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
-            <h2 id="receipt-title" class="type-display-lg text-primary">
-              {{ restaurantName || "L'Addition Receipt" }}
-            </h2>
-            <div class="receipt-panel__meta type-label text-muted">
-              <span>{{ receiptDate }}</span>
-            </div>
-          </header>
-
-          <section class="receipt-section stack-md" aria-labelledby="receipt-breakdown-title">
-            <SectionHeader
-              title-id="receipt-breakdown-title"
-              title="Guest Breakdown"
-              :level="SectionHeaderLevel.Three"
-              :type="SectionHeaderType.Receipt"
-            >
-              <template #actions>
-                <InlineAction
-                  :text="areAllReceiptDinersExpanded ? 'Collapse All' : 'Expand All'"
-                  @click="toggleAllReceiptDiners"
-                />
-              </template>
-            </SectionHeader>
-
-            <div class="receipt-diner-grid">
-              <ClassicReceiptDinerCard
-                v-for="(diner, index) in receiptCalculation.diners"
-                :key="diner.id"
-                :diner="diner"
-                :diner-index="index"
-                :format-currency="formatCurrency"
-                :format-signed-currency="formatSignedCurrency"
-                :is-expanded="isReceiptDinerExpanded(diner.id)"
-                :is-rounding-enabled="isRoundingEnabled"
-                @toggle="toggleReceiptDiner"
-              />
-            </div>
-          </section>
-
-          <ClassicReceiptSummary
-            :calculation="receiptCalculation"
-            :format-currency="formatCurrency"
-            :format-signed-currency="formatSignedCurrency"
-            :is-rounding-enabled="isRoundingEnabled"
-            :qr-code-image-url="qrCodeImageUrl"
-          />
-
-          <footer class="receipt-signature">
-            <span aria-hidden="true"></span>
-            <p>L'Addition</p>
-            <span aria-hidden="true"></span>
-          </footer>
-        </article>
+          :are-all-diners-expanded="areAllReceiptDinersExpanded"
+          :calculation="receiptCalculation"
+          :expanded-diner-ids="expandedDinerIds"
+          :format-currency="formatCurrency"
+          :format-signed-currency="formatSignedCurrency"
+          :is-rounding-enabled="isRoundingEnabled"
+          :qr-code-image-url="qrCodeImageUrl"
+          :receipt-date="receiptDate"
+          :restaurant-name="restaurantName"
+          @toggle-all-diners="toggleAllReceiptDiners"
+          @toggle-diner="toggleReceiptDiner"
+        />
 
         <article
           v-else

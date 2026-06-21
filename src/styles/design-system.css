@@ -1131,100 +1131,6 @@ layer(vendor);
     height: 100%;
   }
 
-  .receipt-panel {
-    position: relative;
-    width: min(100%, 1000px);
-    margin: 0 auto var(--space-sm);
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-surface) 92%, var(--color-secondary-fixed)),
-      var(--color-surface-container-lowest)
-    );
-    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: var(--space-md) var(--space-sm);
-    box-shadow: var(--shadow-elevated);
-  }
-
-  .receipt-panel__header {
-    min-width: 0;
-    align-items: center;
-    margin-bottom: var(--space-2xl);
-    text-align: center;
-  }
-
-  .receipt-panel__logo {
-    width: calc(var(--space-2xl) * 2);
-    height: calc(var(--space-2xl) * 2);
-    object-fit: contain;
-  }
-
-  .receipt-panel__header h2 {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-  }
-
-  .receipt-panel__meta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-  }
-
-  .receipt-panel__meta span[aria-hidden='true'] {
-    width: var(--space-2xs);
-    height: var(--space-2xs);
-    border-radius: var(--radius-pill);
-    background: var(--color-outline-variant);
-  }
-
-  .receipt-section {
-    margin-bottom: var(--space-2xl);
-  }
-
-  .receipt-diner-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-xl) var(--space-2xl);
-  }
-
-  .receipt-signature {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    margin-top: var(--space-xl);
-    text-align: center;
-  }
-
-  .receipt-signature > span {
-    height: 1px;
-    flex: 1;
-    background: var(--color-secondary);
-  }
-
-  .receipt-signature p {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    color: var(--color-secondary);
-    font-family: var(--font-display);
-    font-size: var(--type-headline-sm-size);
-    font-style: italic;
-    line-height: var(--type-headline-sm-line);
-    white-space: nowrap;
-  }
-
-  .receipt-signature p::before,
-  .receipt-signature p::after {
-    color: var(--color-secondary);
-    content: '✦';
-    font-family: var(--font-body);
-    font-size: var(--type-label-sm-size);
-    font-style: normal;
-    line-height: var(--type-label-sm-line);
-  }
-
   .receipt-polished {
     position: relative;
     display: flex;
@@ -1544,13 +1450,6 @@ layer(vendor);
       height: 400px;
     }
 
-    .receipt-panel {
-      padding: var(--space-2xl);
-    }
-
-    .receipt-diner-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 
   @media (min-width: 1024px) {
@@ -1558,9 +1457,6 @@ layer(vendor);
       grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
     }
 
-    .receipt-diner-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
   }
 
   .showcase-panel {
