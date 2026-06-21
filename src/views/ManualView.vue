@@ -15,6 +15,7 @@ import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -976,31 +977,14 @@ watch(
         @cancel="cancelQrCrop"
       />
 
-      <div v-if="isReceiptGenerated" class="receipt-actions">
-        <label class="button button--outline receipt-qr-upload">
-          Upload QR Code
-          <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
-          <input accept="image/*" type="file" @change="uploadQrCodeImage" />
-        </label>
-        <button
-          v-if="qrCodeImageUrl"
-          class="button button--ghost"
-          type="button"
-          @click="clearQrCodeImage"
-        >
-          Remove QR
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-        <button
-          class="button button--outline"
-          type="button"
-          :disabled="isReceiptDownloading"
-          @click="downloadReceiptImage"
-        >
-          {{ isReceiptDownloading ? 'Preparing Image…' : 'Download Image' }}
-          <span class="material-symbols-outlined" aria-hidden="true">download</span>
-        </button>
-      </div>
+      <ReceiptActions
+        v-if="isReceiptGenerated"
+        :has-qr-code="Boolean(qrCodeImageUrl)"
+        :is-downloading="isReceiptDownloading"
+        @upload-qr="uploadQrCodeImage"
+        @remove-qr="clearQrCodeImage"
+        @download="downloadReceiptImage"
+      />
     </main>
   </PublicLayout>
 </template>

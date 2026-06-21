@@ -1403,26 +1403,6 @@ layer(vendor);
     line-height: var(--type-label-sm-line);
   }
 
-  .receipt-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-sm);
-    margin-top: var(--space-lg);
-  }
-
-  .receipt-qr-upload {
-    cursor: pointer;
-  }
-
-  .receipt-qr-upload input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
   .receipt-polished {
     position: relative;
     display: flex;
