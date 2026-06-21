@@ -3,20 +3,14 @@ import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
-import AdjustmentRow from '@/components/manual/AdjustmentRow.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import DinerSection from '@/components/manual/DinerSection.vue'
-import DiscountControl from '@/components/manual/DiscountControl.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
+import ManualSummaryPanel from '@/components/manual/ManualSummaryPanel.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
-import SwitchControl from '@/components/manual/SwitchControl.vue'
-import { InlineActionType } from '@/components/common/types/inline-action'
-import {
-  SectionHeaderLevel,
-  SectionHeaderType,
-} from '@/components/common/types/section-header'
+import { SectionHeaderLevel, SectionHeaderType } from '@/components/common/types/section-header'
 import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
@@ -686,102 +680,28 @@ watch(
           />
         </section>
 
-        <aside class="manual-summary stack-lg" aria-label="Bill summary">
-          <section class="stack-md">
-            <h2 class="type-label text-muted">Adjustments</h2>
-            <label class="summary-input-row">
-              <span>Service Charge</span>
-              <span>
-                <input
-                  v-model="serviceCharge"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />%
-              </span>
-            </label>
-            <label class="summary-input-row">
-              <span>VAT</span>
-              <span>
-                <input
-                  v-model="taxRate"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />%
-              </span>
-            </label>
-            <div class="summary-input-row">
-              <span>Discount</span>
-              <DiscountControl
-                v-model:discount="discount"
-                v-model:discount-unit="discountUnit"
-                :currency-symbol="currencySymbol"
-                @amount-keydown="blockInvalidNumberKey"
-              />
-            </div>
-            <AdjustmentRow
-              v-for="adjustment in adjustments"
-              :key="adjustment.id"
-              v-model:label="adjustment.label"
-              v-model:amount="adjustment.amount"
-              :currency-symbol="currencySymbol"
-              @amount-keydown="blockInvalidNumberKey"
-              @remove="removeAdjustment(adjustment.id)"
-            />
-            <InlineAction
-              icon="add"
-              text="Add Adjustment"
-              :type="InlineActionType.Muted"
-              @click="addAdjustment"
-            />
-            <label class="summary-toggle-row summary-toggle-row--switch">
-              <span>Round Totals</span>
-              <SwitchControl
-                v-model="isRoundingEnabled"
-                :detail="`Nearest ${currencySymbol}`"
-              />
-            </label>
-          </section>
-
-          <section class="stack-sm">
-            <TotalRow label="Subtotal" :value="formatCurrency(subtotal)" />
-            <TotalRow label="VAT &amp; Fees" :value="formatCurrency(taxAndFees)" />
-            <TotalRow
-              v-if="additionalAdjustmentsTotal > 0"
-              label="Adjustments"
-              :value="formatCurrency(additionalAdjustmentsTotal)"
-            />
-            <TotalRow label="Total" :value="formatCurrency(total)" :type="TotalRowType.Total" />
-          </section>
-
-          <div class="manual-summary__actions">
-            <button
-              class="button button--primary manual-summary__action"
-              type="button"
-              :disabled="!hasItems"
-              @click="generateReceipt"
-            >
-              Generate Receipt
-              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-            </button>
-            <button
-              class="button button--outline manual-summary__action"
-              type="button"
-              :disabled="!hasBillData"
-              @click="openClearDialog"
-            >
-              Clear
-              <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </aside>
+        <ManualSummaryPanel
+          v-model:service-charge="serviceCharge"
+          v-model:tax-rate="taxRate"
+          v-model:discount="discount"
+          v-model:discount-unit="discountUnit"
+          v-model:is-rounding-enabled="isRoundingEnabled"
+          :adjustments="adjustments"
+          :additional-adjustments-total="
+            additionalAdjustmentsTotal > 0 ? formatCurrency(additionalAdjustmentsTotal) : ''
+          "
+          :currency-symbol="currencySymbol"
+          :has-bill-data="hasBillData"
+          :has-items="hasItems"
+          :subtotal="formatCurrency(subtotal)"
+          :tax-and-fees="formatCurrency(taxAndFees)"
+          :total="formatCurrency(total)"
+          @amount-keydown="blockInvalidNumberKey"
+          @add-adjustment="addAdjustment"
+          @remove-adjustment="removeAdjustment"
+          @generate-receipt="generateReceipt"
+          @clear-bill="openClearDialog"
+        />
       </div>
 
       <div v-if="isReceiptGenerated" class="receipt-variant-controls">

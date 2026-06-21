@@ -1088,79 +1088,6 @@ layer(vendor);
     align-items: start;
   }
 
-  .summary-input-row {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-xs);
-    border-bottom: var(--border-subtle);
-    padding-block: var(--space-xs);
-  }
-
-  .summary-input-row input {
-    min-width: 0;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary);
-    font-family: var(--font-body);
-  }
-
-  .summary-input-row input:focus {
-    outline: none;
-  }
-
-  .summary-input-row span:last-child {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    color: var(--color-on-surface-variant);
-  }
-
-  .summary-input-row input {
-    width: 3.75rem;
-    font-size: var(--type-number-md-size);
-    font-variant-numeric: tabular-nums lining-nums;
-    line-height: var(--type-number-md-line);
-    text-align: right;
-  }
-
-  .manual-summary {
-    min-width: 0;
-    background: var(--color-surface-container-low);
-    border: var(--border-subtle);
-    padding: var(--space-sm);
-  }
-
-  .summary-input-row {
-    color: var(--color-on-surface);
-  }
-
-  .summary-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    border-bottom: var(--border-subtle);
-    color: var(--color-on-surface);
-    padding-block: var(--space-xs);
-  }
-
-  .summary-toggle-row > span:first-child {
-    font-size: var(--type-body-md-size);
-    line-height: var(--type-body-md-line);
-  }
-
-  .manual-summary__actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  .manual-summary__action {
-    width: 100%;
-  }
-
   .dialog-backdrop {
     position: fixed;
     inset: 0;
@@ -1860,18 +1787,6 @@ layer(vendor);
       padding-block: var(--space-section);
     }
 
-    .manual-summary {
-      padding: var(--space-lg);
-    }
-
-    .summary-input-row {
-      gap: var(--space-sm);
-    }
-
-    .summary-input-row input {
-      width: 5rem;
-    }
-
     .qr-crop-container {
       height: 400px;
     }
@@ -1892,11 +1807,6 @@ layer(vendor);
   @media (min-width: 1024px) {
     .manual-layout {
       grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-    }
-
-    .manual-summary {
-      position: sticky;
-      top: calc(var(--top-bar-height) + var(--space-lg));
     }
 
     .receipt-diner-grid {
