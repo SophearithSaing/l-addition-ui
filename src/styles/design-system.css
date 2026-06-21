@@ -846,30 +846,6 @@ layer(vendor);
     background: var(--color-surface-container-low);
   }
 
-  .scan-page {
-    width: 100%;
-    padding-block: var(--space-section);
-  }
-
-  .recent-section__title {
-    border-bottom: var(--border-subtle);
-    padding-bottom: var(--space-sm);
-  }
-
-  .history-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    border-radius: var(--radius-pill);
-    background: var(--color-surface-container-high);
-    color: var(--color-on-surface-variant);
-    padding: var(--space-2xs) var(--space-sm);
-  }
-
-  .history-chip .material-symbols-outlined {
-    font-size: var(--type-label-md-size);
-  }
-
   .showcase-panel {
     min-height: 176px;
     display: flex;

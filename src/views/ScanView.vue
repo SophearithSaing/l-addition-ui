@@ -41,3 +41,15 @@ import UploadZone from '@/components/scan/UploadZone.vue'
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.scan-page {
+  width: 100%;
+  padding-block: var(--space-section);
+}
+
+.recent-section__title {
+  border-bottom: var(--border-subtle);
+  padding-bottom: var(--space-sm);
+}
+</style>
