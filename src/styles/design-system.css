@@ -936,12 +936,6 @@ layer(vendor);
     }
   }
 
-  .public-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
   .public-header,
   .compact-header {
     position: sticky;

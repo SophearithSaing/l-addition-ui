@@ -10,3 +10,11 @@ import PublicHeader from './PublicHeader.vue'
     <PublicFooter />
   </div>
 </template>
+
+<style scoped>
+.public-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+</style>
