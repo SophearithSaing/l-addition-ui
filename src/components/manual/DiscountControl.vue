@@ -35,6 +35,7 @@ function updateDiscount(event: Event): void {
       {{ currencySymbol }}
     </button>
     <input
+      class="discount-control__input"
       :value="discount"
       inputmode="decimal"
       min="0"
@@ -67,6 +68,23 @@ function updateDiscount(event: Event): void {
   color: var(--color-on-surface-variant);
 }
 
+.discount-control__input {
+  min-width: 0;
+  width: 3.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-number-md-size);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: var(--type-number-md-line);
+  text-align: right;
+}
+
+.discount-control__input:focus {
+  outline: none;
+}
+
 .discount-control__unit {
   min-width: var(--space-md);
   display: inline-flex;
@@ -91,5 +109,11 @@ function updateDiscount(event: Event): void {
 
 .discount-control__unit:not(.discount-control__unit--active) {
   opacity: 0.3;
+}
+
+@media (min-width: 768px) {
+  .discount-control__input {
+    width: 5rem;
+  }
 }
 </style>
