@@ -16,6 +16,8 @@ import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
+import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
+import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
 import ReceiptQrCode from '@/components/receipt/ReceiptQrCode.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
@@ -82,7 +84,7 @@ const qrCropImageSrc = ref<string | null>(null)
 const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<HTMLElement | null>(null)
-const receiptExportFrame = ref<HTMLElement | null>(null)
+const receiptExportFrame = ref<ReceiptExportFrameExpose | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
 let nextSharedItemId = 1
@@ -597,14 +599,15 @@ function toggleAllReceiptDiners(): void {
  * Downloads the generated receipt as a PNG image.
  */
 async function downloadReceiptImage(): Promise<void> {
-  if (!receiptExportFrame.value || isReceiptDownloading.value) {
+  const node = receiptExportFrame.value?.getElement()
+
+  if (!node || isReceiptDownloading.value) {
     return
   }
 
   isReceiptDownloading.value = true
 
   try {
-    const node = receiptExportFrame.value
     const rect = node.getBoundingClientRect()
     const dataUrl = await toPng(node, {
       cacheBust: true,
@@ -710,11 +713,10 @@ watch(
 
       <ReceiptVariantSwitch v-if="isReceiptGenerated" v-model="receiptVariant" />
 
-      <div
+      <ReceiptExportFrame
         v-if="isReceiptGenerated"
         ref="receiptExportFrame"
-        class="receipt-export-frame"
-        :class="{ 'receipt-export-frame--polished': receiptVariant === ReceiptVariant.Polished }"
+        :is-polished="receiptVariant === ReceiptVariant.Polished"
       >
         <article
           v-if="receiptVariant === ReceiptVariant.Classic"
@@ -955,7 +957,7 @@ watch(
             <span aria-hidden="true"></span>
           </footer>
         </article>
-      </div>
+      </ReceiptExportFrame>
 
       <ConfirmDialog
         :is-open="isClearDialogOpen"

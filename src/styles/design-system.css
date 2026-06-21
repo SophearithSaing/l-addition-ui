@@ -1131,35 +1131,6 @@ layer(vendor);
     height: 100%;
   }
 
-  .receipt-export-frame {
-    width: min(100%, 1120px);
-    margin: var(--space-md) auto 0;
-    overflow: hidden;
-    background:
-      radial-gradient(
-        circle at top,
-        color-mix(in srgb, var(--color-secondary-fixed) 18%, transparent),
-        transparent 42%
-      ),
-      var(--color-surface-container-low);
-    padding: var(--space-sm) var(--space-sm) var(--space-lg);
-  }
-
-  .receipt-export-frame--polished {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    max-width: 760px;
-    background:
-      radial-gradient(
-        circle at top left,
-        color-mix(in srgb, var(--color-secondary-fixed) 34%, transparent),
-        transparent 48%
-      ),
-      var(--color-surface-container-highest);
-  }
-
   .receipt-panel {
     position: relative;
     width: min(100%, 1000px);
@@ -1705,10 +1676,6 @@ layer(vendor);
 
     .qr-crop-container {
       height: 400px;
-    }
-
-    .receipt-export-frame {
-      padding: var(--space-xl) var(--space-xl) var(--space-2xl);
     }
 
     .receipt-panel {
