@@ -5,6 +5,7 @@ import ConfirmDialog from '@/components/public/ConfirmDialog.vue'
 import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import DinerSection from '@/components/manual/DinerSection.vue'
+import DiscountControl from '@/components/manual/DiscountControl.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
@@ -372,15 +373,6 @@ function blockInvalidNumberKey(event: KeyboardEvent): void {
 }
 
 /**
- * Selects the active discount unit.
- *
- * @param unit Discount unit to use.
- */
-function setDiscountUnit(unit: 'fixed' | 'percentage'): void {
-  discountUnit.value = unit
-}
-
-/**
  * Adds an empty diner card to the bill.
  */
 function addDiner(): void {
@@ -725,37 +717,12 @@ watch(
             </label>
             <div class="summary-input-row">
               <span>Discount</span>
-              <span class="discount-control">
-                <button
-                  class="discount-control__unit"
-                  :class="{ 'discount-control__unit--active': discountUnit === 'fixed' }"
-                  type="button"
-                  aria-label="Use fixed discount"
-                  :aria-pressed="discountUnit === 'fixed'"
-                  @click="setDiscountUnit('fixed')"
-                >
-                  {{ currencySymbol }}
-                </button>
-                <input
-                  v-model="discount"
-                  inputmode="decimal"
-                  min="0"
-                  placeholder="0.00"
-                  step="0.01"
-                  type="number"
-                  @keydown="blockInvalidNumberKey"
-                />
-                <button
-                  class="discount-control__unit"
-                  :class="{ 'discount-control__unit--active': discountUnit === 'percentage' }"
-                  type="button"
-                  aria-label="Use percentage discount"
-                  :aria-pressed="discountUnit === 'percentage'"
-                  @click="setDiscountUnit('percentage')"
-                >
-                  %
-                </button>
-              </span>
+              <DiscountControl
+                v-model:discount="discount"
+                v-model:discount-unit="discountUnit"
+                :currency-symbol="currencySymbol"
+                @amount-keydown="blockInvalidNumberKey"
+              />
             </div>
             <div
               v-for="adjustment in adjustments"
