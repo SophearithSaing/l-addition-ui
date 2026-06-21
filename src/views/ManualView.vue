@@ -8,6 +8,7 @@ import DinerSection from '@/components/manual/DinerSection.vue'
 import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualItemRow from '@/components/manual/ManualItemRow.vue'
 import PageHero from '@/components/common/PageHero.vue'
+import SharedParticipantSelector from '@/components/manual/SharedParticipantSelector.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
 import {
@@ -504,17 +505,6 @@ function removeAdjustment(adjustmentId: number): void {
 }
 
 /**
- * Gets a diner display label.
- *
- * @param diner Diner to label.
- * @param index Diner index.
- * @returns Diner name, or fallback label.
- */
-function getDinerLabel(diner: ManualDiner, index: number): string {
-  return diner.name.trim() || `Diner ${index + 1}`
-}
-
-/**
  * Shows the generated receipt and opens all diner breakdowns.
  */
 function generateReceipt(): void {
@@ -720,26 +710,11 @@ watch(
                 @remove="removeSharedItem(item.id)"
               />
 
-              <div class="stack-xs">
-                <p class="shared-participant-label type-label text-muted">Participating Diners</p>
-                <p v-if="diners.length === 0" class="type-body-md text-muted">
-                  Add diners to choose who participates.
-                </p>
-                <div v-else class="shared-participant-list">
-                  <button
-                    v-for="(diner, index) in diners"
-                    :key="diner.id"
-                    class="shared-participant"
-                    :class="{
-                      'shared-participant--active': item.participantIds.includes(diner.id),
-                    }"
-                    type="button"
-                    @click="toggleSharedParticipant(item, diner.id)"
-                  >
-                    {{ getDinerLabel(diner, index) }}
-                  </button>
-                </div>
-              </div>
+              <SharedParticipantSelector
+                :diners="diners"
+                :participant-ids="item.participantIds"
+                @toggle-participant="toggleSharedParticipant(item, $event)"
+              />
             </article>
           </section>
         </section>
