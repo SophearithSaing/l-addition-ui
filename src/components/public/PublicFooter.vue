@@ -5,3 +5,21 @@
     </div>
   </footer>
 </template>
+
+<style scoped>
+.public-footer {
+  margin-top: auto;
+  border-top: var(--border-subtle);
+  padding-block: var(--space-section);
+  background: var(--color-surface-container);
+}
+
+.public-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+</style>

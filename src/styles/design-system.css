@@ -995,30 +995,6 @@ layer(vendor);
     font-weight: 700;
   }
 
-  .public-footer {
-    margin-top: auto;
-    background: var(--color-surface-container);
-    border-top: var(--border-subtle);
-    padding-block: var(--space-section);
-  }
-
-  .public-footer__inner,
-  .public-footer__links {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    text-align: center;
-  }
-
-  .public-footer__links {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-md);
-  }
-
   .home-select {
     flex: 1;
     display: flex;
