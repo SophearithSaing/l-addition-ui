@@ -13,9 +13,10 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
 import ClassicReceipt from '@/components/receipt/ClassicReceipt.vue'
 import type { ClassicReceiptExpose } from '@/components/receipt/types/classic-receipt'
 import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
+import PolishedReceipt from '@/components/receipt/PolishedReceipt.vue'
+import type { PolishedReceiptExpose } from '@/components/receipt/types/polished-receipt'
 import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
-import ReceiptQrCode from '@/components/receipt/ReceiptQrCode.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -80,7 +81,7 @@ const qrCodeImageUrl = ref<string | null>(null)
 const qrCropImageSrc = ref<string | null>(null)
 const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
-const receiptPanel = ref<ClassicReceiptExpose | HTMLElement | null>(null)
+const receiptPanel = ref<ClassicReceiptExpose | PolishedReceiptExpose | null>(null)
 const receiptExportFrame = ref<ReceiptExportFrameExpose | null>(null)
 let nextDinerId = 1
 let nextItemId = 1
@@ -213,30 +214,6 @@ function formatSignedCurrency(amount: number): string {
   }
 
   return `+${formatCurrency(amount)}`
-}
-
-/**
- * Gets the sign for an amount.
- *
- * @param amount Amount to inspect.
- * @returns Minus sign for negative amounts, otherwise plus sign.
- */
-function getAmountSign(amount: number): string {
-  if (amount < 0) {
-    return '-'
-  }
-
-  return '+'
-}
-
-/**
- * Formats an absolute amount without a currency symbol.
- *
- * @param amount Amount to format.
- * @returns Absolute formatted amount label.
- */
-function formatAbsoluteAmount(amount: number): string {
-  return Math.abs(amount).toFixed(2)
 }
 
 /**
@@ -533,10 +510,6 @@ function getReceiptPanelElement(): HTMLElement | null {
     return null
   }
 
-  if (panel instanceof HTMLElement) {
-    return panel
-  }
-
   return panel.getElement()
 }
 
@@ -740,94 +713,17 @@ watch(
           @toggle-diner="toggleReceiptDiner"
         />
 
-        <article
+        <PolishedReceipt
           v-else
           ref="receiptPanel"
-          class="receipt-polished"
-          aria-labelledby="polished-title"
-        >
-          <header class="receipt-polished__header">
-            <img class="receipt-polished__logo" src="/receipt-logo.png" alt="L'Addition" />
-            <h2 id="polished-title" class="receipt-polished__title">
-              {{ restaurantName || "L'Addition" }}
-            </h2>
-            <div class="receipt-polished__header-divider type-label text-muted">
-              <span aria-hidden="true"></span>
-              <span>{{ receiptDate }}</span>
-              <span aria-hidden="true"></span>
-            </div>
-          </header>
-
-          <section class="receipt-polished__guest-list" aria-label="Guest totals">
-            <div class="receipt-polished__guest receipt-polished__guest--header">
-              <span>Name</span>
-              <span>Details</span>
-              <span>Subtotal</span>
-            </div>
-            <article
-              v-for="(diner, index) in receiptCalculation.diners"
-              :key="diner.id"
-              class="receipt-polished__guest"
-            >
-              <h3>{{ diner.name || `Diner ${index + 1}` }}</h3>
-              <p>
-                {{ diner.subtotal.toFixed(2) }}
-                <span v-if="diner.fees !== 0" class="receipt-polished__detail-adjustment">
-                  <span>{{ getAmountSign(diner.fees) }}</span>
-                  <span>{{ formatAbsoluteAmount(diner.fees) }}</span>
-                </span>
-                <span v-if="isRoundingEnabled" class="receipt-polished__detail-adjustment">
-                  <span>{{ getAmountSign(diner.rounding) }}</span>
-                  <span>{{ formatAbsoluteAmount(diner.rounding) }}</span>
-                </span>
-              </p>
-              <strong>{{ formatCurrency(diner.total) }}</strong>
-            </article>
-          </section>
-
-          <section class="receipt-polished__summary" aria-label="Receipt summary">
-            <div>
-              <span>Subtotal</span>
-              <strong>{{ formatCurrency(receiptCalculation.subtotal) }}</strong>
-            </div>
-            <div>
-              <span>Service &amp; VAT</span>
-              <strong>{{
-                formatCurrency(receiptCalculation.service + receiptCalculation.tax)
-              }}</strong>
-            </div>
-            <div v-if="receiptCalculation.adjustments > 0">
-              <span>Adjustments</span>
-              <strong>{{ formatCurrency(receiptCalculation.adjustments) }}</strong>
-            </div>
-            <div v-if="receiptCalculation.discount > 0">
-              <span>Discount</span>
-              <strong>-{{ formatCurrency(receiptCalculation.discount) }}</strong>
-            </div>
-            <div v-if="isRoundingEnabled">
-              <span>Rounding</span>
-              <strong>{{ formatSignedCurrency(receiptCalculation.rounding) }}</strong>
-            </div>
-          </section>
-
-          <div
-            class="receipt-polished__settlement"
-            :class="{ 'receipt-polished__settlement--with-qr': qrCodeImageUrl }"
-          >
-            <ReceiptQrCode v-if="qrCodeImageUrl" :image-url="qrCodeImageUrl" />
-
-            <section class="receipt-polished__hero" aria-label="Grand total">
-              <span class="receipt-polished__hero-label">Grand Total</span>
-              <strong>{{ formatCurrency(receiptCalculation.total) }}</strong>
-            </section>
-          </div>
-
-          <footer class="receipt-polished__footer">
-            <span aria-hidden="true"></span>
-            <p>L'Addition</p>
-            <span aria-hidden="true"></span>
-          </footer>
-        </article>
+          :calculation="receiptCalculation"
+          :format-currency="formatCurrency"
+          :format-signed-currency="formatSignedCurrency"
+          :is-rounding-enabled="isRoundingEnabled"
+          :qr-code-image-url="qrCodeImageUrl"
+          :receipt-date="receiptDate"
+          :restaurant-name="restaurantName"
+        />
       </ReceiptExportFrame>
 
       <ConfirmDialog
