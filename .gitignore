@@ -40,5 +40,6 @@ __screenshots__/
 
 # Local Development
 references/
+docs/
 .pi/
 .agents/
