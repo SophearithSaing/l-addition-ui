@@ -15,6 +15,8 @@ import TotalRow from '@/components/common/TotalRow.vue'
 import { TotalRowType } from '@/components/common/types/total-row'
 import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import PublicLayout from '@/components/public/PublicLayout.vue'
+import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
+import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 
 interface ManualItem {
@@ -72,7 +74,7 @@ const isReceiptGenerated = ref(false)
 const isReceiptDownloading = ref(false)
 const isClearDialogOpen = ref(false)
 const shouldSkipNextDraftSave = ref(false)
-const receiptVariant = ref<'classic' | 'polished'>('classic')
+const receiptVariant = ref<ReceiptVariant>(ReceiptVariant.Classic)
 const qrCodeImageUrl = ref<string | null>(null)
 const qrCropImageSrc = ref<string | null>(null)
 const isQrCropDialogOpen = ref(false)
@@ -704,37 +706,16 @@ watch(
         />
       </div>
 
-      <div v-if="isReceiptGenerated" class="receipt-variant-controls">
-        <div class="receipt-variant-switch" aria-label="Receipt style">
-          <button
-            class="receipt-variant-switch__option"
-            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'classic' }"
-            type="button"
-            :aria-pressed="receiptVariant === 'classic'"
-            @click="receiptVariant = 'classic'"
-          >
-            Classic
-          </button>
-          <button
-            class="receipt-variant-switch__option"
-            :class="{ 'receipt-variant-switch__option--active': receiptVariant === 'polished' }"
-            type="button"
-            :aria-pressed="receiptVariant === 'polished'"
-            @click="receiptVariant = 'polished'"
-          >
-            Polished
-          </button>
-        </div>
-      </div>
+      <ReceiptVariantSwitch v-if="isReceiptGenerated" v-model="receiptVariant" />
 
       <div
         v-if="isReceiptGenerated"
         ref="receiptExportFrame"
         class="receipt-export-frame"
-        :class="{ 'receipt-export-frame--polished': receiptVariant === 'polished' }"
+        :class="{ 'receipt-export-frame--polished': receiptVariant === ReceiptVariant.Polished }"
       >
         <article
-          v-if="receiptVariant === 'classic'"
+          v-if="receiptVariant === ReceiptVariant.Classic"
           ref="receiptPanel"
           class="receipt-panel"
           aria-labelledby="receipt-title"
