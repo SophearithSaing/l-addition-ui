@@ -11,6 +11,7 @@ import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
+import SwitchControl from '@/components/manual/SwitchControl.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
 import {
   SectionHeaderLevel,
@@ -742,11 +743,10 @@ watch(
             />
             <label class="summary-toggle-row summary-toggle-row--switch">
               <span>Round Totals</span>
-              <span class="summary-switch-control">
-                <small>Nearest {{ currencySymbol }}</small>
-                <input v-model="isRoundingEnabled" type="checkbox" />
-                <span aria-hidden="true"></span>
-              </span>
+              <SwitchControl
+                v-model="isRoundingEnabled"
+                :detail="`Nearest ${currencySymbol}`"
+              />
             </label>
           </section>
 
