@@ -42,3 +42,15 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
     </main>
   </PublicLayout>
 </template>
+
+<style scoped>
+.home-select {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-section);
+  padding-block: var(--space-section);
+}
+</style>
