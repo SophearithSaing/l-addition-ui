@@ -1,10 +1,51 @@
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+onMounted(() => {
+  void authStore.loadSession()
+})
+
+/**
+ * Logs out the active user and returns to the public home page.
+ */
+async function handleLogout(): Promise<void> {
+  await authStore.logout()
+  await router.push('/')
+}
+</script>
+
 <template>
   <header class="public-header">
     <nav class="public-nav app-container" aria-label="Primary navigation">
       <RouterLink class="public-brand" to="/">L'Addition</RouterLink>
-      <RouterLink class="public-header-link type-label" to="/design-system/philosophy">
-        Design System
-      </RouterLink>
+
+      <div class="public-nav__links cluster">
+        <RouterLink class="public-header-link type-label" to="/design-system/philosophy">
+          Design System
+        </RouterLink>
+        <span class="public-nav__divider" aria-hidden="true"></span>
+        <button
+          v-if="authStore.isAuthenticated"
+          class="public-header-link type-label"
+          type="button"
+          @click="handleLogout"
+        >
+          Log out
+        </button>
+        <template v-else>
+          <RouterLink class="public-header-link type-label" to="/login">
+            Log in
+          </RouterLink>
+          <RouterLink class="button button--gold-leaf button--compact" to="/sign-up">
+            Sign up
+          </RouterLink>
+        </template>
+      </div>
     </nav>
   </header>
 </template>
@@ -24,6 +65,16 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
+}
+
+.public-nav__links {
+  justify-content: flex-end;
+}
+
+.public-nav__divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-outline-variant);
 }
 
 .public-brand {
