@@ -31,7 +31,7 @@ const emit = defineEmits<{
 .upload-zone {
   position: relative;
   display: flex;
-  min-height: calc(var(--space-2xl) * 5);
+  min-height: calc(var(--space-2xl) * 6);
   flex-direction: column;
   align-items: center;
   justify-content: center;
