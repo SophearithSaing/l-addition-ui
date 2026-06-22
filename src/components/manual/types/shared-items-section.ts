@@ -8,7 +8,13 @@ export interface SharedItemsSectionItem {
 }
 
 export interface SharedItemsSectionProps {
+  addLabel?: string
   currencySymbol: string
   diners: SharedParticipantSelectorDiner[]
+  emptyText?: string
+  namePlaceholder?: string
+  participantLabel?: string
+  removeLabel?: string
   sharedItems: SharedItemsSectionItem[]
+  title?: string
 }

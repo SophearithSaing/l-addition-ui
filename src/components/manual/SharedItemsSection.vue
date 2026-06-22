@@ -5,12 +5,16 @@ import { SectionHeaderType } from '@/components/common/types/section-header'
 import ManualItemRow from './ManualItemRow.vue'
 import SharedParticipantSelector from './SharedParticipantSelector.vue'
 import { ManualItemRowType } from './types/manual-item-row'
-import type {
-  SharedItemsSectionItem,
-  SharedItemsSectionProps,
-} from './types/shared-items-section'
+import type { SharedItemsSectionItem, SharedItemsSectionProps } from './types/shared-items-section'
 
-defineProps<SharedItemsSectionProps>()
+withDefaults(defineProps<SharedItemsSectionProps>(), {
+  addLabel: 'Add Shared Item',
+  emptyText: 'Add items that should be split across multiple diners.',
+  namePlaceholder: 'Shared item name',
+  participantLabel: 'Participating Diners',
+  removeLabel: 'Remove shared item',
+  title: 'Shared Items',
+})
 
 const emit = defineEmits<{
   'add-shared-item': []
@@ -22,35 +26,23 @@ const emit = defineEmits<{
 
 <template>
   <section class="shared-items-section stack-md" aria-labelledby="shared-items-title">
-    <SectionHeader
-      title-id="shared-items-title"
-      title="Shared Items"
-      :type="SectionHeaderType.Baseline"
-    >
+    <SectionHeader title-id="shared-items-title" :title="title" :type="SectionHeaderType.Baseline">
       <template #actions>
-        <InlineAction
-          icon="add"
-          text="Add Shared Item"
-          @click="emit('add-shared-item')"
-        />
+        <InlineAction icon="add" :text="addLabel" @click="emit('add-shared-item')" />
       </template>
     </SectionHeader>
 
     <p v-if="sharedItems.length === 0" class="type-body-md text-muted">
-      Add items that should be split across multiple diners.
+      {{ emptyText }}
     </p>
 
-    <article
-      v-for="item in sharedItems"
-      :key="item.id"
-      class="shared-items-section__card"
-    >
+    <article v-for="item in sharedItems" :key="item.id" class="shared-items-section__card">
       <ManualItemRow
         v-model:name="item.name"
         v-model:amount="item.amount"
         :currency-symbol="currencySymbol"
-        name-placeholder="Shared item name"
-        remove-label="Remove shared item"
+        :name-placeholder="namePlaceholder"
+        :remove-label="removeLabel"
         :type="ManualItemRowType.Active"
         @amount-keydown="emit('amount-keydown', $event)"
         @remove="emit('remove-shared-item', item.id)"
@@ -59,6 +51,7 @@ const emit = defineEmits<{
       <SharedParticipantSelector
         :diners="diners"
         :participant-ids="item.participantIds"
+        :label="participantLabel"
         @toggle-participant="emit('toggle-participant', item, $event)"
       />
     </article>
