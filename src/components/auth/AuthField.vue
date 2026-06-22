@@ -51,11 +51,11 @@ const showPassword = ref(false)
 }
 
 .auth-field__input {
-  padding-inline: 0;
+  padding-inline: var(--space-sm);
 }
 
 .auth-field__input--with-action {
-  padding-right: var(--space-lg);
+  padding-right: var(--space-xl);
 }
 
 .auth-field__action {
