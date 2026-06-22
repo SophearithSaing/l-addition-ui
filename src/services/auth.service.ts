@@ -63,7 +63,23 @@ export class AuthService {
    * @returns Authenticated user response.
    */
   public async getCurrentUser(): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/me`, {
+    const response = await this.sendAuthenticatedRequest('/me')
+
+    if (!response.ok) {
+      throw new Error(await this.getErrorMessage(response))
+    }
+
+    return this.parseAuthResponse(response)
+  }
+
+  /**
+   * Rotates the refresh token and gets a new access token.
+   *
+   * @returns Authenticated user response.
+   */
+  public async refreshSession(): Promise<AuthResponse> {
+    const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+      method: 'POST',
       credentials: 'include',
     })
 
@@ -90,6 +106,34 @@ export class AuthService {
     }
 
     return response.json() as Promise<LogoutResponse>
+  }
+
+  /**
+   * Sends an authenticated request and refreshes once when access expires.
+   *
+   * @param path API path to request.
+   * @param init Fetch options.
+   * @returns Fetch response after optional refresh retry.
+   */
+  public async sendAuthenticatedRequest(
+    path: string,
+    init: RequestInit = {},
+  ): Promise<Response> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      ...init,
+      credentials: 'include',
+    })
+
+    if (response.status !== 401) {
+      return response
+    }
+
+    await this.refreshSession()
+
+    return fetch(`${this.baseUrl}${path}`, {
+      ...init,
+      credentials: 'include',
+    })
   }
 
   /**
