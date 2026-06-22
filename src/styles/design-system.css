@@ -107,6 +107,7 @@ layer(vendor);
 
     --container-page: 1140px;
     --container-reading: 800px;
+    --container-auth: 480px;
     --sidebar-width: 16rem;
     --top-bar-height: 4rem;
 
@@ -483,6 +484,20 @@ layer(vendor);
 }
 
 @layer components {
+  @keyframes gold-leaf-shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
   .button {
     display: inline-flex;
     min-height: 44px;
@@ -517,6 +532,39 @@ layer(vendor);
     background: var(--color-surface-tint);
   }
 
+  .button--accent {
+    background: var(--color-secondary);
+    color: var(--color-on-secondary);
+  }
+
+  .button--accent:hover {
+    background: var(--color-on-secondary-container);
+  }
+
+  .button--gold-leaf {
+    background: linear-gradient(
+      135deg,
+      var(--color-secondary) 0%,
+      var(--color-secondary-fixed-dim) 50%,
+      var(--color-secondary) 100%
+    );
+    background-size: 200% 200%;
+    color: var(--color-on-secondary);
+    animation: gold-leaf-shimmer 5s ease infinite;
+  }
+
+  .button--gold-leaf:hover {
+    opacity: 0.9;
+  }
+
+  .button--compact {
+    padding-inline: var(--space-sm);
+  }
+
+  .button--full {
+    width: 100%;
+  }
+
   .button--outline {
     background: transparent;
     border-color: var(--color-outline);
@@ -541,6 +589,37 @@ layer(vendor);
     width: 44px;
     padding: 0;
     border-radius: var(--radius-pill);
+  }
+
+  .form-link {
+    color: var(--color-secondary);
+    font-family: var(--font-body);
+    font-size: var(--type-label-sm-size);
+    font-weight: var(--type-label-md-weight);
+    line-height: var(--type-label-sm-line);
+    letter-spacing: var(--type-label-md-tracking);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color var(--motion-smooth);
+  }
+
+  .form-link:hover {
+    color: var(--color-primary);
+  }
+
+  .form-message {
+    border: var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+  }
+
+  .form-message--error {
+    border-color: var(--color-error-container);
+    background: var(--color-error-container);
+    color: var(--color-on-error-container);
   }
 
   .field {
