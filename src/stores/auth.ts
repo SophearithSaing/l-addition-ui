@@ -60,11 +60,8 @@ export const useAuthStore = defineStore('auth', () => {
    * Logs out the current user and clears local auth state.
    */
   async function logout(): Promise<void> {
-    try {
-      await authService.logout()
-    } finally {
-      user.value = null
-    }
+    await authService.logout()
+    user.value = null
   }
 
   return {
