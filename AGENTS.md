@@ -27,19 +27,23 @@ The design system owns visual decisions. Product components should compose exist
 1. No hardcoded visual values in components.
    Use design tokens for color, spacing, typography, shadows, borders, radii, and breakpoints.
 
-2. No one-off component styling when a reusable primitive or pattern would work.
+2. Prefer building with existing components, primitives, and patterns instead of
+   writing custom HTML and CSS. If no suitable component exists, create a
+   reusable component first, then compose it in product code.
 
-3. If a visual pattern appears twice, promote it into the design system.
+3. No one-off component styling when a reusable primitive or pattern would work.
 
-4. Components may define layout-specific styles only when the style is truly unique to that component.
+4. If a visual pattern appears twice, promote it into the design system.
 
-5. Responsive behavior should be handled through design-system media queries, layout primitives, or documented patterns.
+5. Components may define layout-specific styles only when the style is truly unique to that component.
 
-6. New variants must be added to the design system before being used in product components.
+6. Responsive behavior should be handled through design-system media queries, layout primitives, or documented patterns.
 
-7. Component-local CSS is allowed only as an escape hatch, and it must still use design-system tokens.
+7. New variants must be added to the design system before being used in product components.
 
-8. The design system should describe intent, not raw CSS.
+8. Component-local CSS is allowed only as an escape hatch, and it must still use design-system tokens.
+
+9. The design system should describe intent, not raw CSS.
    Prefer `surface-card`, `text-muted`, `button-primary`, and `stack-md` over arbitrary values.
 
 ## Code Style
