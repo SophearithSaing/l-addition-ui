@@ -5,5 +5,6 @@ export interface SharedParticipantSelectorDiner {
 
 export interface SharedParticipantSelectorProps {
   diners: SharedParticipantSelectorDiner[]
+  label?: string
   participantIds: number[]
 }

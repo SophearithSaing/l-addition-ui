@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ReceiptQrCode from './ReceiptQrCode.vue'
-import type {
-  PolishedReceiptExpose,
-  PolishedReceiptProps,
-} from './types/polished-receipt'
+import type { PolishedReceiptExpose, PolishedReceiptProps } from './types/polished-receipt'
 
 defineProps<PolishedReceiptProps>()
 

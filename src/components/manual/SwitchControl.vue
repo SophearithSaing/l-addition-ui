@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  SwitchControlEmits,
-  SwitchControlProps,
-} from './types/switch-control'
+import type { SwitchControlEmits, SwitchControlProps } from './types/switch-control'
 
 defineProps<SwitchControlProps>()
 

@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  ReceiptActionsEmits,
-  ReceiptActionsProps,
-} from './types/receipt-actions'
+import type { ReceiptActionsEmits, ReceiptActionsProps } from './types/receipt-actions'
 
 defineProps<ReceiptActionsProps>()
 
@@ -16,12 +13,7 @@ const emit = defineEmits<ReceiptActionsEmits>()
       <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
       <input accept="image/*" type="file" @change="emit('upload-qr', $event)" />
     </label>
-    <button
-      v-if="hasQrCode"
-      class="button button--ghost"
-      type="button"
-      @click="emit('remove-qr')"
-    >
+    <button v-if="hasQrCode" class="button button--ghost" type="button" @click="emit('remove-qr')">
       Remove QR
       <span class="material-symbols-outlined" aria-hidden="true">close</span>
     </button>

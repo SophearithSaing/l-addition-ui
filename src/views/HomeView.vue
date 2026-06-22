@@ -26,7 +26,6 @@ import PublicLayout from '@/components/public/PublicLayout.vue'
             description="We'll automatically itemize the bill so you can review and assign them."
             to="/scan"
             :type="HomeChoiceCardType.Scan"
-            disabled
           />
         </template>
 

@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import InlineAction from '@/components/common/InlineAction.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
-import {
-  ManualItemRowType,
-  type ManualItemRowProps,
-} from './types/manual-item-row'
+import { ManualItemRowType, type ManualItemRowProps } from './types/manual-item-row'
 
 withDefaults(defineProps<ManualItemRowProps>(), {
   amountPlaceholder: '0.00',
@@ -69,6 +66,7 @@ const emit = defineEmits<{
   border: 0;
   background: transparent;
   color: var(--color-primary);
+  padding-inline: var(--space-sm);
   font-family: var(--font-body);
 }
 
@@ -97,7 +95,7 @@ const emit = defineEmits<{
 }
 
 .manual-item-row__price input {
-  width: 3.75rem;
+  width: calc(3.75rem + (var(--space-sm) * 2));
   font-size: var(--type-number-md-size);
   font-variant-numeric: tabular-nums lining-nums;
   line-height: var(--type-number-md-line);
@@ -110,7 +108,7 @@ const emit = defineEmits<{
   }
 
   .manual-item-row__price input {
-    width: 5rem;
+    width: calc(5rem + (var(--space-sm) * 2));
   }
 }
 </style>

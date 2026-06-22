@@ -38,9 +38,7 @@ async function handleLogout(): Promise<void> {
           Log out
         </button>
         <template v-else>
-          <RouterLink class="public-header-link type-label" to="/login">
-            Log in
-          </RouterLink>
+          <RouterLink class="public-header-link type-label" to="/login"> Log in </RouterLink>
           <RouterLink class="button button--gold-leaf button--compact" to="/sign-up">
             Sign up
           </RouterLink>

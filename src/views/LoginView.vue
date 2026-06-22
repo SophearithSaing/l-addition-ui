@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AuthField from '@/components/auth/AuthField.vue'
 import AuthShell from '@/components/auth/AuthShell.vue'
 import AuthSwitch from '@/components/auth/AuthSwitch.vue'
@@ -8,11 +8,21 @@ import { AuthFieldType } from '@/components/auth/types/auth-field'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+const redirectPath = computed(() => {
+  const redirect = route.query.redirect
+
+  if (typeof redirect !== 'string' || !redirect.startsWith('/') || redirect.startsWith('//')) {
+    return '/manual'
+  }
+
+  return redirect
+})
 
 /**
  * Authenticates the user and opens the app on success.
@@ -25,12 +35,11 @@ async function submitLogin(): Promise<void> {
     const user = await authStore.login(email.value, password.value)
 
     if (user.email) {
-      await router.push('/manual')
+      await router.push(redirectPath.value)
     }
   } catch (error) {
-    errorMessage.value = error instanceof Error
-      ? error.message
-      : 'Unable to log in. Please try again.'
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Unable to log in. Please try again.'
   } finally {
     isSubmitting.value = false
   }

@@ -4,7 +4,9 @@ import type {
   SharedParticipantSelectorProps,
 } from './types/shared-participant-selector'
 
-defineProps<SharedParticipantSelectorProps>()
+withDefaults(defineProps<SharedParticipantSelectorProps>(), {
+  label: 'Participating Diners',
+})
 
 const emit = defineEmits<{
   'toggle-participant': [dinerId: number]
@@ -17,10 +19,7 @@ const emit = defineEmits<{
  * @param index Diner index.
  * @returns Diner name, or fallback label.
  */
-function getDinerLabel(
-  diner: SharedParticipantSelectorDiner,
-  index: number,
-): string {
+function getDinerLabel(diner: SharedParticipantSelectorDiner, index: number): string {
   return diner.name.trim() || `Diner ${index + 1}`
 }
 </script>
@@ -28,7 +27,7 @@ function getDinerLabel(
 <template>
   <div class="stack-xs">
     <p class="shared-participant-selector__label type-label text-muted">
-      Participating Diners
+      {{ label }}
     </p>
     <p v-if="diners.length === 0" class="type-body-md text-muted">
       Add diners to choose who participates.
@@ -39,8 +38,7 @@ function getDinerLabel(
         :key="diner.id"
         class="shared-participant-selector__option"
         :class="{
-          'shared-participant-selector__option--active':
-            participantIds.includes(diner.id),
+          'shared-participant-selector__option--active': participantIds.includes(diner.id),
         }"
         type="button"
         @click="emit('toggle-participant', diner.id)"

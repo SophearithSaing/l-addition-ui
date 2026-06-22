@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { TotalRowType, type TotalRowProps } from './types/total-row'
 
-withDefaults(
-  defineProps<TotalRowProps>(),
-  {
-    type: TotalRowType.Default,
-  },
-)
+withDefaults(defineProps<TotalRowProps>(), {
+  type: TotalRowType.Default,
+})
 </script>
 
 <template>
