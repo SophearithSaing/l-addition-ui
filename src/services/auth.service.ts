@@ -115,10 +115,7 @@ export class AuthService {
    * @param init Fetch options.
    * @returns Fetch response after optional refresh retry.
    */
-  public async sendAuthenticatedRequest(
-    path: string,
-    init: RequestInit = {},
-  ): Promise<Response> {
+  public async sendAuthenticatedRequest(path: string, init: RequestInit = {}): Promise<Response> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
       credentials: 'include',
@@ -143,10 +140,7 @@ export class AuthService {
    * @param payload Auth request body.
    * @returns Authenticated user response.
    */
-  private async sendAuthRequest(
-    path: string,
-    payload: AuthPayload,
-  ): Promise<AuthResponse> {
+  private async sendAuthRequest(path: string, payload: AuthPayload): Promise<AuthResponse> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: 'POST',
       headers: {
