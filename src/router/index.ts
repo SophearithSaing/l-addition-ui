@@ -16,6 +16,14 @@ const router = createRouter({
       component: () => import('@/views/ManualView.vue'),
     },
     {
+      path: '/sign-up',
+      component: () => import('@/views/SignUpView.vue'),
+    },
+    {
+      path: '/login',
+      component: () => import('@/views/LoginView.vue'),
+    },
+    {
       path: '/design-system',
       alias: '/design-sytem',
       component: () => import('@/views/design-system/DesignSystemLayout.vue'),
