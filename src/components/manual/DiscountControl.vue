@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  DiscountControlProps,
-  DiscountUnit,
-} from './types/discount-control'
+import type { DiscountControlProps, DiscountUnit } from './types/discount-control'
 
 defineProps<DiscountControlProps>()
 

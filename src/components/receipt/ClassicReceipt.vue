@@ -2,10 +2,7 @@
 import { ref } from 'vue'
 import InlineAction from '@/components/common/InlineAction.vue'
 import SectionHeader from '@/components/common/SectionHeader.vue'
-import {
-  SectionHeaderLevel,
-  SectionHeaderType,
-} from '@/components/common/types/section-header'
+import { SectionHeaderLevel, SectionHeaderType } from '@/components/common/types/section-header'
 import ClassicReceiptDinerCard from './ClassicReceiptDinerCard.vue'
 import ClassicReceiptSummary from './ClassicReceiptSummary.vue'
 import type {
@@ -44,11 +41,7 @@ defineExpose<ClassicReceiptExpose>({
 </script>
 
 <template>
-  <article
-    ref="panelElement"
-    class="receipt-panel"
-    aria-labelledby="receipt-title"
-  >
+  <article ref="panelElement" class="receipt-panel" aria-labelledby="receipt-title">
     <header class="receipt-panel__header stack-sm">
       <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
       <h2 id="receipt-title" class="type-display-lg text-primary">

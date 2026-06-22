@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  HomeChoiceCardType,
-  type HomeChoiceCardProps,
-} from './types/home-choice-card'
+import { HomeChoiceCardType, type HomeChoiceCardProps } from './types/home-choice-card'
 
 withDefaults(defineProps<HomeChoiceCardProps>(), {
   disabled: false,

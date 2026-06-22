@@ -16,8 +16,7 @@ const emit = defineEmits<ReceiptVariantSwitchEmits>()
       <button
         class="receipt-variant-switch__option"
         :class="{
-          'receipt-variant-switch__option--active':
-            modelValue === ReceiptVariant.Classic,
+          'receipt-variant-switch__option--active': modelValue === ReceiptVariant.Classic,
         }"
         type="button"
         :aria-pressed="modelValue === ReceiptVariant.Classic"
@@ -28,8 +27,7 @@ const emit = defineEmits<ReceiptVariantSwitchEmits>()
       <button
         class="receipt-variant-switch__option"
         :class="{
-          'receipt-variant-switch__option--active':
-            modelValue === ReceiptVariant.Polished,
+          'receipt-variant-switch__option--active': modelValue === ReceiptVariant.Polished,
         }"
         type="button"
         :aria-pressed="modelValue === ReceiptVariant.Polished"

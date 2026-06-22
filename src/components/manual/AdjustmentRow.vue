@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  AdjustmentRowEmits,
-  AdjustmentRowProps,
-} from './types/adjustment-row'
+import type { AdjustmentRowEmits, AdjustmentRowProps } from './types/adjustment-row'
 
 defineProps<AdjustmentRowProps>()
 
@@ -29,12 +26,7 @@ function updateAmount(event: Event): void {
 
 <template>
   <div class="adjustment-row">
-    <input
-      class="adjustment-row__label"
-      :value="label"
-      placeholder="Label"
-      @input="updateLabel"
-    />
+    <input class="adjustment-row__label" :value="label" placeholder="Label" @input="updateLabel" />
     <span class="adjustment-row__control">
       <span class="adjustment-row__unit">{{ currencySymbol }}</span>
       <input

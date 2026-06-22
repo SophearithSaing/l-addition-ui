@@ -28,9 +28,8 @@ async function submitSignUp(): Promise<void> {
       await router.push('/manual')
     }
   } catch (error) {
-    errorMessage.value = error instanceof Error
-      ? error.message
-      : 'Unable to create your account. Please try again.'
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Unable to create your account. Please try again.'
   } finally {
     isSubmitting.value = false
   }

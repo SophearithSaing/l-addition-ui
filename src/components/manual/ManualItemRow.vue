@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import InlineAction from '@/components/common/InlineAction.vue'
 import { InlineActionType } from '@/components/common/types/inline-action'
-import {
-  ManualItemRowType,
-  type ManualItemRowProps,
-} from './types/manual-item-row'
+import { ManualItemRowType, type ManualItemRowProps } from './types/manual-item-row'
 
 withDefaults(defineProps<ManualItemRowProps>(), {
   amountPlaceholder: '0.00',

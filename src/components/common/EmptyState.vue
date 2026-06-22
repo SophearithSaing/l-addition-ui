@@ -21,12 +21,7 @@ const emit = defineEmits<{
       <p class="type-body-md text-muted">{{ message }}</p>
     </div>
 
-    <button
-      v-if="actionLabel"
-      class="button button--primary"
-      type="button"
-      @click="emit('action')"
-    >
+    <button v-if="actionLabel" class="button button--primary" type="button" @click="emit('action')">
       {{ actionLabel }}
     </button>
   </article>

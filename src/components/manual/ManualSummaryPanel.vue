@@ -6,10 +6,7 @@ import { TotalRowType } from '@/components/common/types/total-row'
 import AdjustmentRow from './AdjustmentRow.vue'
 import DiscountControl from './DiscountControl.vue'
 import SwitchControl from './SwitchControl.vue'
-import type {
-  ManualSummaryPanelEmits,
-  ManualSummaryPanelProps,
-} from './types/manual-summary-panel'
+import type { ManualSummaryPanelEmits, ManualSummaryPanelProps } from './types/manual-summary-panel'
 
 defineProps<ManualSummaryPanelProps>()
 
