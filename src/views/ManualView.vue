@@ -416,7 +416,7 @@ function removeItem(diner: ManualDiner, itemId: number): void {
  * Adds an empty shared item with all diners selected.
  */
 function addSharedItem(): void {
-  sharedItems.value.push({
+  sharedItems.value.unshift({
     amount: '',
     id: nextSharedItemId,
     name: '',
