@@ -82,6 +82,7 @@ async function handleLogout(): Promise<void> {
         >
           Design System
         </RouterLink>
+        <span class="public-nav__mobile-divider" aria-hidden="true"></span>
         <button
           v-if="authStore.isAuthenticated"
           class="public-header-link type-label"
@@ -159,6 +160,12 @@ async function handleLogout(): Promise<void> {
 .public-nav__divider {
   width: 1px;
   align-self: stretch;
+  background: var(--color-outline-variant);
+}
+
+.public-nav__mobile-divider {
+  width: 100%;
+  height: 1px;
   background: var(--color-outline-variant);
 }
 
