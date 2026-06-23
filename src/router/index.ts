@@ -1,5 +1,8 @@
+import { ref } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+
+export const isInitialRouteLoading = ref(true)
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +72,14 @@ router.beforeEach(async (to) => {
       query: { redirect: to.fullPath },
     }
   }
+})
+
+router.afterEach(() => {
+  isInitialRouteLoading.value = false
+})
+
+router.onError(() => {
+  isInitialRouteLoading.value = false
 })
 
 export default router
