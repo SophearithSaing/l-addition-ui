@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
-
-onMounted(() => {
-  void authStore.loadSession()
-})
 
 /**
  * Logs out the active user and returns to the public home page.
