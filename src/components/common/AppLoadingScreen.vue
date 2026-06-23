@@ -5,7 +5,7 @@
     aria-live="polite"
     aria-label="Loading L'Addition"
   >
-    <img class="app-loading-screen__logo" src="/l-addition-logo.png" alt="L'Addition" />
+    <h1 class="app-loading-screen__brand type-headline-lg">L'Addition</h1>
     <div class="app-loading-screen__progress" aria-hidden="true">
       <div class="app-loading-screen__bar"></div>
     </div>
@@ -51,11 +51,11 @@
   padding-inline: var(--space-container-mobile);
 }
 
-.app-loading-screen__logo {
-  width: calc(var(--space-2xl) * 2);
-  height: calc(var(--space-2xl) * 2);
+.app-loading-screen__brand {
   margin-bottom: var(--space-lg);
-  object-fit: contain;
+  color: var(--color-secondary);
+  font-style: italic;
+  font-weight: var(--type-headline-md-weight);
   animation: app-loading-fade-in 500ms ease-out forwards;
 }
 
@@ -70,7 +70,7 @@
   margin-inline: auto;
   background: var(--color-secondary);
   opacity: 0;
-  animation: app-loading-expand-line 3000ms cubic-bezier(0.65, 0, 0.35, 1) 500ms forwards;
+  animation: app-loading-expand-line 3000ms cubic-bezier(0.65, 0, 0.35, 1) 500ms infinite;
 }
 
 @media (min-width: 768px) {
@@ -80,7 +80,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-loading-screen__logo,
+  .app-loading-screen__brand,
   .app-loading-screen__bar {
     animation-duration: 1ms;
     animation-delay: 0ms;
