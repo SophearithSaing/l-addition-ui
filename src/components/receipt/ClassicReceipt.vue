@@ -43,7 +43,7 @@ defineExpose<ClassicReceiptExpose>({
 <template>
   <article ref="panelElement" class="receipt-panel" aria-labelledby="receipt-title">
     <header class="receipt-panel__header stack-sm">
-      <img class="receipt-panel__logo" src="/receipt-logo.png" alt="L'Addition" />
+      <img class="receipt-panel__logo" src="/l-addition-logo.png" alt="L'Addition" />
       <h2 id="receipt-title" class="type-display-lg text-primary">
         {{ restaurantName || "L'Addition Receipt" }}
       </h2>
