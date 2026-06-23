@@ -57,7 +57,7 @@ const serviceCharge = ref('')
 const taxRate = ref('')
 const discount = ref('')
 const discountUnit = ref<DiscountUnit>('fixed')
-const isRoundingEnabled = ref(true)
+const isRoundingEnabled = ref(false)
 const newPersonName = ref('')
 const errorMessage = ref('')
 const scanErrorMessage = ref('')
@@ -140,7 +140,7 @@ const hasBillData = computed(() => {
     Number(serviceCharge.value) > 0 ||
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
-    isRoundingEnabled.value !== true ||
+    isRoundingEnabled.value !== false ||
     isReceiptGenerated.value
   )
 })
@@ -449,7 +449,7 @@ function clearBill(): void {
   taxRate.value = ''
   discount.value = ''
   discountUnit.value = 'fixed'
-  isRoundingEnabled.value = true
+  isRoundingEnabled.value = false
   isReceiptGenerated.value = false
   expandedDinerIds.value = []
   clearQrCodeImage()
