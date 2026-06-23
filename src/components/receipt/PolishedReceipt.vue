@@ -48,7 +48,7 @@ defineExpose<PolishedReceiptExpose>({
 <template>
   <article ref="panelElement" class="receipt-polished" aria-labelledby="polished-title">
     <header class="receipt-polished__header">
-      <img class="receipt-polished__logo" src="/receipt-logo.png" alt="L'Addition" />
+      <img class="receipt-polished__logo" src="/l-addition-logo.png" alt="L'Addition" />
       <h2 id="polished-title" class="receipt-polished__title">
         {{ restaurantName || "L'Addition" }}
       </h2>

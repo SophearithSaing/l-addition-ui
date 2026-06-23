@@ -1,22 +1,28 @@
 <script setup lang="ts">
+import { toPng } from 'html-to-image'
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import PageHero from '@/components/common/PageHero.vue'
+import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualSummaryPanel from '@/components/manual/ManualSummaryPanel.vue'
+import QrCropDialog from '@/components/public/QrCropDialog.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
 import ClassicReceipt from '@/components/receipt/ClassicReceipt.vue'
 import PolishedReceipt from '@/components/receipt/PolishedReceipt.vue'
+import ReceiptActions from '@/components/receipt/ReceiptActions.vue'
 import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import UploadZone from '@/components/scan/UploadZone.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
+import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import { aiService } from '@/services/ai.service'
 import { groupService } from '@/services/group.service'
 import { calculateReceipt } from '@/lib/receipt-calculator'
 import type { DiscountUnit } from '@/components/manual/types/discount-control'
 import type { ClassicReceiptExpose } from '@/components/receipt/types/classic-receipt'
 import type { PolishedReceiptExpose } from '@/components/receipt/types/polished-receipt'
+import type { ReceiptExportFrameExpose } from '@/components/receipt/types/receipt-export-frame'
 
 interface ScanDiner {
   id: number
@@ -39,9 +45,11 @@ interface ScanAdjustment {
 
 type ScanProcessingState = 'idle' | 'processing' | 'success' | 'failure'
 
-const currencySymbol = '฿'
 const maxUploadSize = 10 * 1024 * 1024
 const acceptedUploadTypes = ['image/jpeg', 'image/png']
+const restaurantName = ref('')
+const currency = ref<CurrencyCode>(CurrencyCode.Thb)
+const customCurrency = ref('')
 const diners = ref<ScanDiner[]>([])
 const sharedItems = ref<ScanSharedItem[]>([])
 const adjustments = ref<ScanAdjustment[]>([])
@@ -49,7 +57,7 @@ const serviceCharge = ref('')
 const taxRate = ref('')
 const discount = ref('')
 const discountUnit = ref<DiscountUnit>('fixed')
-const isRoundingEnabled = ref(true)
+const isRoundingEnabled = ref(false)
 const newPersonName = ref('')
 const errorMessage = ref('')
 const scanErrorMessage = ref('')
@@ -58,9 +66,14 @@ const isGroupLoading = ref(false)
 const isGroupSaving = ref(false)
 const isUploading = ref(false)
 const isReceiptGenerated = ref(false)
+const isReceiptDownloading = ref(false)
 const receiptVariant = ref<ReceiptVariant>(ReceiptVariant.Classic)
+const qrCodeImageUrl = ref<string | null>(null)
+const qrCropImageSrc = ref<string | null>(null)
+const isQrCropDialogOpen = ref(false)
 const expandedDinerIds = ref<number[]>([])
 const receiptPanel = ref<ClassicReceiptExpose | PolishedReceiptExpose | null>(null)
+const receiptExportFrame = ref<ReceiptExportFrameExpose | null>(null)
 const assignmentSection = ref<HTMLElement | null>(null)
 let nextDinerId = 1
 let nextSharedItemId = 1
@@ -69,6 +82,17 @@ let successScrollTimeoutId: number | undefined
 
 const selectedDinerIds = computed(() => {
   return new Set(sharedItems.value.flatMap((item) => item.participantIds))
+})
+const currencySymbol = computed(() => {
+  if (currency.value === CurrencyCode.Thb) {
+    return '฿'
+  }
+
+  if (currency.value === CurrencyCode.Custom) {
+    return customCurrency.value.trim() || '$'
+  }
+
+  return '$'
 })
 const activeDiners = computed(() => {
   return diners.value.filter((diner) => selectedDinerIds.value.has(diner.id))
@@ -107,13 +131,16 @@ const total = computed(() => receiptCalculation.value.total)
 const hasItems = computed(() => activeDiners.value.length > 0)
 const hasBillData = computed(() => {
   return (
+    restaurantName.value.trim().length > 0 ||
+    customCurrency.value.trim().length > 0 ||
+    currency.value !== CurrencyCode.Thb ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
     adjustments.value.length > 0 ||
     Number(serviceCharge.value) > 0 ||
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
-    isRoundingEnabled.value !== true ||
+    isRoundingEnabled.value !== false ||
     isReceiptGenerated.value
   )
 })
@@ -123,6 +150,16 @@ const receiptDate = computed(() => {
     month: 'short',
     year: 'numeric',
   }).format(new Date())
+})
+const receiptImageFileName = computed(() => {
+  const restaurant = restaurantName.value.trim() || 'scanned-receipt'
+  const date = new Date().toISOString().slice(0, 10)
+  const slug = restaurant
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
+  return `${slug || 'scanned-receipt'}-${date}.png`
 })
 const areAllReceiptDinersExpanded = computed(() => {
   return (
@@ -161,7 +198,7 @@ function parseAmount(value: string): number {
  * @returns Formatted currency label.
  */
 function formatCurrency(amount: number): string {
-  return `${currencySymbol}${amount.toFixed(2)}`
+  return `${currencySymbol.value}${amount.toFixed(2)}`
 }
 
 /**
@@ -403,15 +440,19 @@ function removeAdjustment(adjustmentId: number): void {
  * Clears the current scanned bill state.
  */
 function clearBill(): void {
+  restaurantName.value = ''
+  currency.value = CurrencyCode.Thb
+  customCurrency.value = ''
   sharedItems.value = []
   adjustments.value = []
   serviceCharge.value = ''
   taxRate.value = ''
   discount.value = ''
   discountUnit.value = 'fixed'
-  isRoundingEnabled.value = true
+  isRoundingEnabled.value = false
   isReceiptGenerated.value = false
   expandedDinerIds.value = []
+  clearQrCodeImage()
   errorMessage.value = ''
   scanErrorMessage.value = ''
   scanState.value = 'idle'
@@ -486,12 +527,96 @@ function toggleAllReceiptDiners(): void {
   expandedDinerIds.value = receiptCalculation.value.diners.map((diner) => diner.id)
 }
 
+/**
+ * Reads a QR code image and opens the crop dialog.
+ *
+ * @param event File input change event.
+ */
+function uploadQrCodeImage(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.addEventListener('load', () => {
+    qrCropImageSrc.value = String(reader.result)
+    isQrCropDialogOpen.value = true
+  })
+  reader.readAsDataURL(file)
+  input.value = ''
+}
+
+/**
+ * Applies the cropped QR code image to the receipt.
+ *
+ * @param croppedDataUrl Cropped image data URL.
+ */
+function confirmQrCrop(croppedDataUrl: string): void {
+  qrCodeImageUrl.value = croppedDataUrl
+  isQrCropDialogOpen.value = false
+  qrCropImageSrc.value = null
+}
+
+/**
+ * Cancels the QR code crop and closes the dialog.
+ */
+function cancelQrCrop(): void {
+  isQrCropDialogOpen.value = false
+  qrCropImageSrc.value = null
+}
+
+/**
+ * Clears the local QR code image preview.
+ */
+function clearQrCodeImage(): void {
+  qrCodeImageUrl.value = null
+}
+
+/**
+ * Downloads the generated receipt as a PNG image.
+ */
+async function downloadReceiptImage(): Promise<void> {
+  const node = receiptExportFrame.value?.getElement()
+
+  if (!node || isReceiptDownloading.value) {
+    return
+  }
+
+  isReceiptDownloading.value = true
+
+  try {
+    const rect = node.getBoundingClientRect()
+    const dataUrl = await toPng(node, {
+      cacheBust: true,
+      height: rect.height,
+      pixelRatio: 2,
+      style: {
+        margin: '0',
+        width: `${rect.width}px`,
+      },
+      width: rect.width,
+    })
+    const link = document.createElement('a')
+
+    link.download = receiptImageFileName.value
+    link.href = dataUrl
+    link.click()
+  } finally {
+    isReceiptDownloading.value = false
+  }
+}
+
 onMounted(() => {
   void loadGroupPeople()
 })
 
 onUnmounted(() => {
   clearSuccessScrollTimeout()
+  clearQrCodeImage()
 })
 </script>
 
@@ -612,6 +737,12 @@ onUnmounted(() => {
 
       <div ref="assignmentSection" class="scan-layout">
         <section class="scan-workspace stack-lg" aria-label="Receipt assignment">
+          <ManualContextForm
+            v-model:restaurant-name="restaurantName"
+            v-model:currency="currency"
+            v-model:custom-currency="customCurrency"
+          />
+
           <SharedItemsSection
             title="Scanned Items"
             add-label="Add Missing Item"
@@ -725,6 +856,7 @@ onUnmounted(() => {
 
       <ReceiptExportFrame
         v-if="isReceiptGenerated"
+        ref="receiptExportFrame"
         :is-polished="receiptVariant === ReceiptVariant.Polished"
       >
         <ClassicReceipt
@@ -736,9 +868,9 @@ onUnmounted(() => {
           :format-currency="formatCurrency"
           :format-signed-currency="formatSignedCurrency"
           :is-rounding-enabled="isRoundingEnabled"
-          :qr-code-image-url="null"
+          :qr-code-image-url="qrCodeImageUrl"
           :receipt-date="receiptDate"
-          restaurant-name="Scanned Receipt"
+          :restaurant-name="restaurantName"
           @toggle-all-diners="toggleAllReceiptDiners"
           @toggle-diner="toggleReceiptDiner"
         />
@@ -750,11 +882,27 @@ onUnmounted(() => {
           :format-currency="formatCurrency"
           :format-signed-currency="formatSignedCurrency"
           :is-rounding-enabled="isRoundingEnabled"
-          :qr-code-image-url="null"
+          :qr-code-image-url="qrCodeImageUrl"
           :receipt-date="receiptDate"
-          restaurant-name="Scanned Receipt"
+          :restaurant-name="restaurantName"
         />
       </ReceiptExportFrame>
+
+      <QrCropDialog
+        :is-open="isQrCropDialogOpen"
+        :image-src="qrCropImageSrc ?? ''"
+        @confirm="confirmQrCrop"
+        @cancel="cancelQrCrop"
+      />
+
+      <ReceiptActions
+        v-if="isReceiptGenerated"
+        :has-qr-code="Boolean(qrCodeImageUrl)"
+        :is-downloading="isReceiptDownloading"
+        @upload-qr="uploadQrCodeImage"
+        @remove-qr="clearQrCodeImage"
+        @download="downloadReceiptImage"
+      />
     </main>
   </PublicLayout>
 </template>

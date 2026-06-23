@@ -68,7 +68,7 @@ const serviceCharge = ref('')
 const taxRate = ref('')
 const discount = ref('')
 const discountUnit = ref<'fixed' | 'percentage'>('fixed')
-const isRoundingEnabled = ref(true)
+const isRoundingEnabled = ref(false)
 const diners = ref<ManualDiner[]>([])
 const sharedItems = ref<SharedItem[]>([])
 const adjustments = ref<ManualAdjustment[]>([])
@@ -133,7 +133,7 @@ const hasBillData = computed(() => {
     Number(serviceCharge.value) > 0 ||
     Number(taxRate.value) > 0 ||
     Number(discount.value) > 0 ||
-    isRoundingEnabled.value !== true ||
+    isRoundingEnabled.value !== false ||
     currency.value !== CurrencyCode.Thb ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
@@ -249,7 +249,7 @@ function restoreManualDraftState(draft: ManualDraftState): void {
   diners.value = draft.diners ?? []
   discount.value = draft.discount ?? ''
   discountUnit.value = draft.discountUnit ?? 'fixed'
-  isRoundingEnabled.value = draft.isRoundingEnabled ?? true
+  isRoundingEnabled.value = draft.isRoundingEnabled ?? false
   restaurantName.value = draft.restaurantName ?? ''
   serviceCharge.value = draft.serviceCharge ?? ''
   sharedItems.value = draft.sharedItems ?? []
@@ -322,7 +322,7 @@ function confirmClearBill(): void {
   taxRate.value = ''
   discount.value = ''
   discountUnit.value = 'fixed'
-  isRoundingEnabled.value = true
+  isRoundingEnabled.value = false
   diners.value = []
   sharedItems.value = []
   adjustments.value = []

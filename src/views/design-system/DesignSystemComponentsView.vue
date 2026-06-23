@@ -6,9 +6,7 @@ import { TotalRowType } from '@/components/common/types/total-row'
 <template>
   <article class="design-system-page section-stack">
     <section class="design-system-hero stack-md">
-      <h1 class="type-display-lg text-primary">
-        L'Addition Design System: Components &amp; Layout
-      </h1>
+      <h1 class="type-display-lg text-primary">Components &amp; Layout</h1>
       <p class="type-body-lg text-muted">
         This document serves as the technical specification for developers building L'Addition. It
         focuses on component modularity, layout architecture, and responsive behavior to ensure a
