@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import PageHero from '@/components/common/PageHero.vue'
+import ManualContextForm from '@/components/manual/ManualContextForm.vue'
 import ManualSummaryPanel from '@/components/manual/ManualSummaryPanel.vue'
 import SharedItemsSection from '@/components/manual/SharedItemsSection.vue'
 import PublicLayout from '@/components/public/PublicLayout.vue'
@@ -11,6 +12,7 @@ import ReceiptExportFrame from '@/components/receipt/ReceiptExportFrame.vue'
 import ReceiptVariantSwitch from '@/components/receipt/ReceiptVariantSwitch.vue'
 import UploadZone from '@/components/scan/UploadZone.vue'
 import { ReceiptVariant } from '@/components/receipt/types/receipt-variant-switch'
+import { CurrencyCode } from '@/components/manual/types/currency-selector'
 import { aiService } from '@/services/ai.service'
 import { groupService } from '@/services/group.service'
 import { calculateReceipt } from '@/lib/receipt-calculator'
@@ -39,9 +41,11 @@ interface ScanAdjustment {
 
 type ScanProcessingState = 'idle' | 'processing' | 'success' | 'failure'
 
-const currencySymbol = '฿'
 const maxUploadSize = 10 * 1024 * 1024
 const acceptedUploadTypes = ['image/jpeg', 'image/png']
+const restaurantName = ref('')
+const currency = ref<CurrencyCode>(CurrencyCode.Thb)
+const customCurrency = ref('')
 const diners = ref<ScanDiner[]>([])
 const sharedItems = ref<ScanSharedItem[]>([])
 const adjustments = ref<ScanAdjustment[]>([])
@@ -69,6 +73,17 @@ let successScrollTimeoutId: number | undefined
 
 const selectedDinerIds = computed(() => {
   return new Set(sharedItems.value.flatMap((item) => item.participantIds))
+})
+const currencySymbol = computed(() => {
+  if (currency.value === CurrencyCode.Thb) {
+    return '฿'
+  }
+
+  if (currency.value === CurrencyCode.Custom) {
+    return customCurrency.value.trim() || '$'
+  }
+
+  return '$'
 })
 const activeDiners = computed(() => {
   return diners.value.filter((diner) => selectedDinerIds.value.has(diner.id))
@@ -107,6 +122,9 @@ const total = computed(() => receiptCalculation.value.total)
 const hasItems = computed(() => activeDiners.value.length > 0)
 const hasBillData = computed(() => {
   return (
+    restaurantName.value.trim().length > 0 ||
+    customCurrency.value.trim().length > 0 ||
+    currency.value !== CurrencyCode.Thb ||
     diners.value.length > 0 ||
     sharedItems.value.length > 0 ||
     adjustments.value.length > 0 ||
@@ -161,7 +179,7 @@ function parseAmount(value: string): number {
  * @returns Formatted currency label.
  */
 function formatCurrency(amount: number): string {
-  return `${currencySymbol}${amount.toFixed(2)}`
+  return `${currencySymbol.value}${amount.toFixed(2)}`
 }
 
 /**
@@ -403,6 +421,9 @@ function removeAdjustment(adjustmentId: number): void {
  * Clears the current scanned bill state.
  */
 function clearBill(): void {
+  restaurantName.value = ''
+  currency.value = CurrencyCode.Thb
+  customCurrency.value = ''
   sharedItems.value = []
   adjustments.value = []
   serviceCharge.value = ''
@@ -612,6 +633,12 @@ onUnmounted(() => {
 
       <div ref="assignmentSection" class="scan-layout">
         <section class="scan-workspace stack-lg" aria-label="Receipt assignment">
+          <ManualContextForm
+            v-model:restaurant-name="restaurantName"
+            v-model:currency="currency"
+            v-model:custom-currency="customCurrency"
+          />
+
           <SharedItemsSection
             title="Scanned Items"
             add-label="Add Missing Item"
@@ -738,7 +765,7 @@ onUnmounted(() => {
           :is-rounding-enabled="isRoundingEnabled"
           :qr-code-image-url="null"
           :receipt-date="receiptDate"
-          restaurant-name="Scanned Receipt"
+          :restaurant-name="restaurantName"
           @toggle-all-diners="toggleAllReceiptDiners"
           @toggle-diner="toggleReceiptDiner"
         />
@@ -752,7 +779,7 @@ onUnmounted(() => {
           :is-rounding-enabled="isRoundingEnabled"
           :qr-code-image-url="null"
           :receipt-date="receiptDate"
-          restaurant-name="Scanned Receipt"
+          :restaurant-name="restaurantName"
         />
       </ReceiptExportFrame>
     </main>
